@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FaceRoom — Исследование клиентов, июнь 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f7f6f3;--surface:#fff;--border:#e5e4e0;--text:#1a1a1a;
+  --muted:#888;--post:#1a56db;--ush:#c0392b;--voz:#2e7d62;
+  --acc:#b5a06a;--r:10px;--sh:0 1px 4px rgba(0,0,0,.07)
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+.header{background:#fff;border-bottom:1px solid var(--border);
+  padding:16px 32px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100}
+.header h1{font-size:16px;font-weight:600}
+.header p{color:var(--muted);font-size:12px;margin-top:1px}
+.city-filter{display:flex;gap:6px;align-items:center}
+.city-filter label{font-size:12px;color:var(--muted);margin-right:2px}
+.city-btn{border:1px solid var(--border);background:#fff;color:var(--text);
+  padding:5px 14px;border-radius:20px;cursor:pointer;font-size:12px;transition:all .15s}
+.city-btn.active{background:var(--text);color:#fff;border-color:var(--text)}
+.tabs{background:#fff;border-bottom:1px solid var(--border);
+  padding:0 32px;display:flex;overflow-x:auto}
+.tab{padding:12px 16px;font-size:13px;cursor:pointer;
+  border-bottom:2px solid transparent;white-space:nowrap;color:var(--muted);transition:all .15s}
+.tab.active{color:var(--text);border-bottom-color:var(--text);font-weight:500}
+.tab-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}
+.main{padding:24px 32px;max-width:1100px;margin:0 auto}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.section-title{font-size:11px;font-weight:700;letter-spacing:.8px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+/* STAT CARDS */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:16px 20px;box-shadow:var(--sh)}
+.stat-card.post{border-top:3px solid var(--post)}
+.stat-card.ush{border-top:3px solid var(--ush)}
+.stat-card.voz{border-top:3px solid var(--voz)}
+.stat-num{font-size:36px;font-weight:700;letter-spacing:-1px;line-height:1}
+.stat-label{font-size:12px;color:var(--muted);margin-top:4px}
+/* INSIGHT GRID */
+.insights{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+  gap:12px;margin-bottom:28px}
+.ins{background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:16px 18px;box-shadow:var(--sh)}
+.ins-num{font-size:28px;font-weight:700;letter-spacing:-.5px;line-height:1;margin-bottom:6px}
+.ins-num.post{color:var(--post)}.ins-num.ush{color:var(--ush)}
+.ins-num.voz{color:var(--voz)}.ins-num.acc{color:var(--acc)}
+.ins h3{font-size:12px;font-weight:600;margin-bottom:4px}
+.ins p{font-size:12px;color:#444;line-height:1.5}
+/* ANALYSIS BOX */
+.analysis{background:#fafaf8;border:1px solid var(--border);border-radius:var(--r);
+  padding:20px 22px;margin-bottom:28px}
+.analysis h3{font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.6px;color:var(--muted);margin-bottom:14px}
+.ai-items{display:flex;flex-direction:column;gap:12px}
+.ai{display:flex;gap:14px;align-items:flex-start}
+.ai-num{font-size:16px;font-weight:700;min-width:52px;line-height:1.3;flex-shrink:0}
+.ai-num.post{color:var(--post)}.ai-num.ush{color:var(--ush)}
+.ai-num.voz{color:var(--voz)}.ai-num.acc{color:var(--acc)}
+.ai-txt{font-size:13px;line-height:1.55;color:#333}
+.ai-txt strong{color:var(--text)}
+/* CHART CARDS */
+.charts{display:flex;flex-direction:column;gap:16px}
+.chart-row{display:grid;gap:16px}
+.chart-row.cols2{grid-template-columns:1fr 1fr}
+.chart-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:20px 22px;box-shadow:var(--sh)}
+.chart-card h3{font-size:13px;font-weight:600;margin-bottom:2px}
+.chart-card .sub{font-size:11px;color:var(--muted);margin-bottom:16px}
+.chart-card canvas{width:100%!important}
+/* SEG BADGE */
+.seg-badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600}
+.seg-badge.post{background:#e8f0fd;color:var(--post)}
+.seg-badge.ush{background:#fdf0f0;color:var(--ush)}
+.seg-badge.voz{background:#edf6f2;color:var(--voz)}
+.seg-header{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.seg-note{font-size:12px;color:var(--muted)}
+/* KOS */
+.kos-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:12px;margin-bottom:24px}
+.kos-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:16px 18px;box-shadow:var(--sh)}
+.kos-card h4{font-size:11px;color:var(--muted);margin-bottom:6px}
+.kos-pct{font-size:28px;font-weight:700}
+.kos-sub{font-size:11px;color:var(--muted);margin-top:2px}
+/* QUOTES */
+.quotes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px}
+.quote{background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:14px 16px;box-shadow:var(--sh)}
+.quote p{font-size:13px;color:#333;line-height:1.55}
+.quote-meta{font-size:11px;color:var(--muted);margin-top:6px}
+.quotes-empty{color:var(--muted);font-size:13px;padding:20px 0}
+/* FT SEG FILTER */
+.seg-filter{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+.seg-flt{padding:5px 14px;border-radius:20px;border:1px solid var(--border);
+  background:#fff;cursor:pointer;font-size:12px;transition:all .15s}
+.seg-flt.active{background:var(--text);color:#fff;border-color:var(--text)}
+/* CATEGORY CHIPS */
+.cat-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.cat-chip{display:flex;align-items:center;gap:10px;padding:10px 14px;
+  border:1.5px solid var(--border);border-radius:10px;background:#fff;
+  cursor:pointer;transition:all .15s;box-shadow:var(--sh)}
+.cat-chip:hover{border-color:#bbb}
+.cat-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.cat-body{display:flex;flex-direction:column;gap:2px}
+.cat-label{font-size:12px;font-weight:600;line-height:1.2}
+.cat-desc{font-size:11px;color:var(--muted);line-height:1.3}
+.cat-count{font-size:13px;font-weight:700;margin-left:4px;white-space:nowrap}
+/* MINI ECON STRIP */
+.mini-econ{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.mini-econ-item{background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:10px 16px;box-shadow:var(--sh);min-width:120px}
+.mini-econ-val{font-size:17px;font-weight:700;line-height:1;margin-bottom:2px}
+.mini-econ-lbl{font-size:11px;color:var(--muted)}
+/* ECONOMICS BLOCK */
+.econ-banner{background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:20px 24px;display:flex;align-items:center;gap:24px;box-shadow:var(--sh);
+  margin-bottom:12px}
+.econ-big{font-size:48px;font-weight:800;letter-spacing:-2px;line-height:1;flex-shrink:0}
+.econ-big span{font-size:22px;font-weight:500;letter-spacing:0;color:var(--muted)}
+.econ-banner-txt h3{font-size:14px;font-weight:600;margin-bottom:4px}
+.econ-banner-txt p{font-size:12px;color:#555;line-height:1.5;max-width:480px}
+.econ-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.econ-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:18px 20px;box-shadow:var(--sh)}
+.econ-card.post{border-top:3px solid var(--post)}
+.econ-card.ush{border-top:3px solid var(--ush)}
+.econ-card.voz{border-top:3px solid var(--voz)}
+.econ-seg{font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--muted);margin-bottom:10px}
+.econ-rev{font-size:28px;font-weight:700;letter-spacing:-1px;line-height:1;margin-bottom:2px}
+.econ-rev-label{font-size:11px;color:var(--muted);margin-bottom:12px}
+.econ-metrics{display:flex;flex-direction:column;gap:6px}
+.econ-metric{display:flex;justify-content:space-between;align-items:center;
+  border-top:1px solid var(--border);padding-top:6px}
+.econ-metric-label{font-size:11px;color:var(--muted)}
+.econ-metric-val{font-size:13px;font-weight:600}
+/* GOALS BLOCK */
+.goals-block{border:1px solid var(--border);border-radius:var(--r);
+  padding:16px 20px;margin-bottom:20px;background:#fff}
+.goals-block-inner{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.goals-goal h4{font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.6px;color:var(--muted);margin-bottom:6px}
+.goals-goal p{font-size:13px;color:#333;line-height:1.55}
+.goals-qs h4{font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.6px;color:var(--muted);margin-bottom:6px}
+.goals-qs ul{margin:0;padding-left:16px}
+.goals-qs ul li{font-size:12px;color:#555;line-height:1.5;margin-bottom:3px}
+.goals-result{font-size:12px;font-weight:600;color:var(--text);margin-top:12px;
+  padding-top:10px;border-top:1px solid var(--border)}
+/* RESEARCH CONTEXT */
+.ctx-block{background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:18px 22px;margin-bottom:28px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.ctx-col h4{font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.6px;color:var(--muted);margin-bottom:6px}
+.ctx-col p{font-size:12px;color:#444;line-height:1.6}
+.ctx-col ul{margin:0;padding-left:16px;margin-top:4px}
+.ctx-col ul li{font-size:12px;color:#555;line-height:1.5;margin-bottom:3px}
+@media(max-width:700px){
+  .chart-row.cols2{grid-template-columns:1fr}
+  .stat-row{grid-template-columns:1fr}
+  .econ-row{grid-template-columns:1fr}
+  .goals-block-inner{grid-template-columns:1fr}
+  .ctx-block{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>FaceRoom — Исследование клиентов</h1>
+    <p>Июнь 2026 &middot; Основные студии &middot; 195 респондентов</p>
+  </div>
+  <div class="city-filter">
+    <label>Город:</label>
+    <button class="city-btn active" data-city="all">Все</button>
+    <button class="city-btn" data-city="Санкт-Петербург">Санкт-Петербург</button>
+    <button class="city-btn" data-city="Москва">Москва</button>
+    <button class="city-btn" data-city="Уфа">Уфа</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="overview">Обзор</div>
+  <div class="tab" data-tab="conclusions">Основные выводы</div>
+  <div class="tab" data-tab="post"><span class="tab-dot" style="background:var(--post)"></span>Постоянные</div>
+  <div class="tab" data-tab="ush"><span class="tab-dot" style="background:var(--ush)"></span>Ушедшие</div>
+  <div class="tab" data-tab="voz"><span class="tab-dot" style="background:var(--voz)"></span>Возвращённые</div>
+  <div class="tab" data-tab="kos">Косметология</div>
+  <div class="tab" data-tab="ft">Свободные ответы</div>
+</div>
+
+<div class="main">
+
+<!-- OVERVIEW -->
+<div class="tab-content active" id="tab-overview">
+  <div class="stat-row">
+    <div class="stat-card post">
+      <div class="stat-num post-n">91</div>
+      <div class="stat-label">Постоянные &middot; <strong>&gt;70% активность</strong> по месяцам &middot; &gt;5 визитов &middot; &lt;60 дней с последнего визита</div>
+    </div>
+    <div class="stat-card ush">
+      <div class="stat-num ush-n">52</div>
+      <div class="stat-label">Ушедшие &middot; <strong>&lt;50% активность</strong> по месяцам &middot; &gt;3 визитов &middot; &gt;90 дней с последнего визита</div>
+    </div>
+    <div class="stat-card voz">
+      <div class="stat-num voz-n">52</div>
+      <div class="stat-label">Возвращённые &middot; &gt;3 визитов &middot; <strong>&gt;60 дней паузы</strong> перед возвращением &middot; &lt;60 дней с возврата</div>
+    </div>
+  </div>
+  <div class="section-title">Контекст исследования</div>
+  <div class="ctx-block">
+    <div class="ctx-col">
+      <h4>Цель исследования</h4>
+      <p>Понять механики формирования лояльности, причины оттока и драйверы возврата клиентов для разработки механик, направленных на рост удержания, регулярности, LTV и выручки.</p>
+      <ul>
+        <li>Выявить тенденции в удержании, возвращаемости и оттоке</li>
+        <li>Сформировать базу для конкретных продуктовых и CRM-решений</li>
+      </ul>
+    </div>
+    <div class="ctx-col">
+      <h4>Контекст предыдущих исследований</h4>
+      <p>В 2024–2025 гг. проводились опросы с фокусом на портреты клиентов и логику выбора. Слабая сторона — недостаточная проработка под конкретные задачи, что ограничивало применимость выводов.</p>
+      <p style="margin-top:8px">Новое исследование сфокусировано на поведенческих механиках и даёт конкретные ответы по каждому сегменту.</p>
+    </div>
+  </div>
+  <div class="section-title">Экономика сегментов</div>
+  <div id="econ-block"></div>
+  <div class="section-title">Сравнение сегментов</div>
+  <div class="charts">
+    <div class="chart-row cols2">
+      <div class="chart-card"><h3>Возраст клиентов</h3><div class="sub">Распределение по сегментам, %</div><canvas id="cmp-age" height="200"></canvas></div>
+      <div class="chart-card"><h3>Роль ухода за собой</h3><div class="sub">Отношение к уходу, %</div><canvas id="cmp-role" height="200"></canvas></div>
+    </div>
+    <div class="chart-row cols2">
+      <div class="chart-card"><h3>Топ причин оттока</h3><div class="sub">% ушедших, назвавших эту причину</div><canvas id="churn-top" height="220"></canvas></div>
+      <div class="chart-card"><h3>Практики ухода за собой</h3><div class="sub">% от сегмента</div><canvas id="cmp-pract" height="220"></canvas></div>
+    </div>
+    <div class="chart-row cols2">
+      <div class="chart-card"><h3>Что ценно в FaceRoom сейчас</h3><div class="sub">Постоянные vs Возвращённые, %</div><canvas id="cmp-val" height="260"></canvas></div>
+      <div class="chart-card"><h3>Что помогло бы ходить чаще</h3><div class="sub">Постоянные vs Возвращённые, %</div><canvas id="cmp-freq" height="260"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ОСНОВНЫЕ ВЫВОДЫ -->
+<div class="tab-content" id="tab-conclusions">
+  <p style="font-size:13px;color:#555;line-height:1.6;margin-bottom:20px;max-width:680px">Сводные данные по трём сегментам — постоянным, ушедшим и возвращённым клиентам. Каждый инсайт даёт конкретный ответ на вопросы исследования: механики лояльности, причины оттока и драйверы возврата.</p>
+  <div class="section-title">Ключевые инсайты исследования</div>
+  <div class="insights">
+    <div class="ins"><div class="ins-num post">82%</div>
+      <h3>Решение остаться — за первый месяц</h3>
+      <p>71% стали постоянными сразу после первого визита. Первый месяц — критическое окно для формирования привычки.</p></div>
+
+    <div class="ins"><div class="ins-num post">77%</div>
+      <h3>Бренд удерживает сильнее мастера</h3>
+      <p>77% постоянных останутся в FaceRoom если уйдёт любимый специалист. Лишь 9% уйдут за ним.</p></div>
+
+    <div class="ins"><div class="ins-num post">79%</div>
+      <h3>Главная ценность — восстановление</h3>
+      <p>Постоянных выбирают «расслабление» как главную ценность. Ценность смещается с косметического результата к эмоциональной составляющей.</p></div>
+
+    <div class="ins"><div class="ins-num acc">71%</div>
+      <h3>Цена — сквозная проблема</h3>
+      <p>Постоянных хотят более выгодных условий. 77% возвращённых — то же. Запрос на программу лояльности универсален.</p></div>
+
+    <div class="ins"><div class="ins-num ush">42%</div>
+      <h3>Ушедшие: 42% уже у конкурентов</h3>
+      <p>Потребность в уходе сохранилась у 98% ушедших — но 42% уже обслуживаются у конкурентов. 58% на паузе или делают уход дома — наиболее доступны для реактивации.</p></div>
+
+    <div class="ins"><div class="ins-num ush">46%</div>
+      <h3>Отток из-за финансов, не разочарования</h3>
+      <p>Ушедших назвали финансовые приоритеты причиной оттока №1. Это управляемо через ценовые предложения.</p></div>
+
+    <div class="ins"><div class="ins-num voz">44%</div>
+      <h3>CRM-коммуникация реально работает</h3>
+      <p>Возвращённых называют предложение или напоминание от FaceRoom одним из поводов записаться снова.</p></div>
+
+    <div class="ins"><div class="ins-num voz">73%</div>
+      <h3>Бонусная программа — запрос №1</h3>
+      <p>Возвращённых хотят бонусы и привилегии при регулярных посещениях — самый популярный формат из всех.</p></div>
+  </div>
+  <div class="analysis">
+    <h3>Аналитические выводы</h3>
+    <div class="ai-items">
+      <div class="ai"><div class="ai-num ush">+14%</div>
+        <div class="ai-txt"><strong>Ушедшие моложе — это предиктор оттока.</strong> В сегменте ушедших 33% составляют клиенты 26–35 лет против 19% у постоянных. Молодая аудитория более финансово чувствительна и сильнее конкурирует за время. Удержание молодого сегмента требует отдельных механик.</div></div>
+      <div class="ai"><div class="ai-num post">31% / 21%</div>
+        <div class="ai-txt"><strong>Отношение к уходу предсказывает лояльность.</strong> Постоянные чаще видят уход как «важную часть образа жизни» (31% vs 21% у ушедших). Клиенты для которых уход — образ жизни, уходят значительно реже. Это измеримый признак для сегментации базы.</div></div>
+      <div class="ai"><div class="ai-num voz">79% / 77%</div>
+        <div class="ai-txt"><strong>«Расслабление» — устойчивая ценность у активных сегментов.</strong> «Возможность расслабиться и восстановиться» выбирают 79% постоянных и 77% возвращённых с близким весом. Это стабильное позиционирующее преимущество FaceRoom, независимое от истории клиента.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ПОСТОЯННЫЕ -->
+<div class="tab-content" id="tab-post">
+  <div class="seg-header">
+    <span class="seg-badge post">Постоянные</span>
+    <span class="seg-note" id="post-note">n = 91</span>
+  </div>
+  <div id="post-econ" class="mini-econ"></div>
+  <div class="goals-block">
+    <div class="goals-block-inner">
+      <div class="goals-goal">
+        <h4>Цель</h4>
+        <p>Понять, как формируется привычка регулярного посещения и какие элементы обеспечивают долгосрочную лояльность. Определить сильнейшие факторы удержания для развития клиентского опыта и программ лояльности.</p>
+        <div class="goals-result">Бизнес-цель: рост удержания, частоты посещений, LTV и доли постоянных клиентов</div>
+      </div>
+      <div class="goals-qs">
+        <h4>Вопросы исследования</h4>
+        <ul>
+          <li>Через какое время после первого визита формируется привычка возвращаться?</li>
+          <li>Какие факторы удержания оказывают наибольшее влияние?</li>
+          <li>Какие элементы сервиса клиенты считают наиболее ценными сегодня?</li>
+          <li>Какие барьеры сохраняются даже у наиболее лояльных клиентов?</li>
+          <li>Какие инструменты могут дополнительно увеличивать частоту посещений?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="analysis">
+    <h3>Выводы по целям исследования</h3>
+    <div class="ai-items">
+      <div class="ai"><div class="ai-num post">82%</div>
+        <div class="ai-txt"><strong>Критическое окно — первый месяц.</strong> 71% постоянных решили возвращаться сразу после первого визита, ещё часть — в течение первого месяца. Сценарий работы с клиентом после первого посещения определяет, станет ли он постоянным.</div></div>
+      <div class="ai"><div class="ai-num post">77%</div>
+        <div class="ai-txt"><strong>Лояльность к бренду превысила лояльность к мастеру.</strong> Специалист — главный фактор привлечения, но 77% постоянных останутся в FaceRoom если мастер уйдёт. Бренд уже сильнее мастера у этого сегмента — риск ухода за специалистом низкий.</div></div>
+      <div class="ai"><div class="ai-num post">79%</div>
+        <div class="ai-txt"><strong>Ценность смещается с результата к восстановлению.</strong> Пришли ради специалиста и результата, остаются ради расслабления и профилактики возраста. Коммуникация с постоянными должна апеллировать к эмоциональной ценности, не только к косметическому эффекту.</div></div>
+      <div class="ai"><div class="ai-num acc">71%</div>
+        <div class="ai-txt"><strong>Ценовой барьер сохраняется даже у лояльных.</strong> 71% постоянных хотят более выгодных условий — это запрос №1 среди всех барьеров. Программа лояльности с реальной ценовой составляющей снизит риск оттока у самого стабильного сегмента.</div></div>
+    </div>
+  </div>
+  <div class="charts" id="post-charts"></div>
+</div>
+
+<!-- УШЕДШИЕ -->
+<div class="tab-content" id="tab-ush">
+  <div class="seg-header">
+    <span class="seg-badge ush">Ушедшие</span>
+    <span class="seg-note" id="ush-note">n = 52</span>
+  </div>
+  <div id="ush-econ" class="mini-econ"></div>
+  <div class="goals-block">
+    <div class="goals-block-inner">
+      <div class="goals-goal">
+        <h4>Цель</h4>
+        <p>Выявить причины снижения активности и понять, какие факторы привели к уходу клиента. Разделить естественный отток и отток, связанный с управляемыми причинами (стоимость, результат, доступность записи, специалист).</p>
+        <div class="goals-result">Бизнес-цель: снижение оттока и сохранение клиентской базы</div>
+      </div>
+      <div class="goals-qs">
+        <h4>Вопросы исследования</h4>
+        <ul>
+          <li>Сохранилась ли у клиента потребность в уходе?</li>
+          <li>Какие преимущества FaceRoom были наиболее значимыми в период посещений?</li>
+          <li>Какие факторы стали ключевыми причинами снижения частоты или ухода?</li>
+          <li>Какие альтернативы клиент выбрал после прекращения посещений?</li>
+          <li>Какие изменения могли бы повысить ценность студии для этой аудитории?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="analysis">
+    <h3>Выводы по целям исследования</h3>
+    <div class="ai-items">
+      <div class="ai"><div class="ai-num ush">98%</div>
+        <div class="ai-txt"><strong>Потребность в уходе сохранилась почти у всех — но 27% полностью на паузе.</strong> Только 1 из 52 сказал, что тема стала неактуальной. 69% продолжают заботиться о себе реже — они ближе всего к реактивации. 27% не пользуются подобными услугами совсем: им нужен более весомый стимул для возврата.</div></div>
+      <div class="ai"><div class="ai-num ush">46%</div>
+        <div class="ai-txt"><strong>Главная причина оттока — финансы, не разочарование.</strong> 46% ушли из-за изменившихся финансовых приоритетов. Это управляемая причина: специальные предложения, пакеты по выгодной цене или рассрочка — рабочие механики реактивации.</div></div>
+      <div class="ai"><div class="ai-num ush">42%</div>
+        <div class="ai-txt"><strong>42% ушедших сейчас у конкурентов — угроза реальная.</strong> 21% перешли в другую специализированную студию, 13% — в салон красоты или косметологическую клинику, 8% — к частному специалисту. Ещё 31% перешли на домашние практики — они не у конкурента, но и не у FaceRoom.</div></div>
+      <div class="ai"><div class="ai-num acc">73% / 71%</div>
+        <div class="ai-txt"><strong>При возврате ценят квалификацию и цену одновременно.</strong> Квалификация специалистов (73%) и стоимость (71%) — главные критерии при выборе сейчас. Оффер реактивации должен закрывать оба: подчёркивать профессионализм и предлагать выгодные условия.</div></div>
+    </div>
+  </div>
+  <div class="charts" id="ush-charts"></div>
+</div>
+
+<!-- ВОЗВРАЩЁННЫЕ -->
+<div class="tab-content" id="tab-voz">
+  <div class="seg-header">
+    <span class="seg-badge voz">Возвращённые</span>
+    <span class="seg-note" id="voz-note">n = 52</span>
+  </div>
+  <div id="voz-econ" class="mini-econ"></div>
+  <div class="goals-block">
+    <div class="goals-block-inner">
+      <div class="goals-goal">
+        <h4>Цель</h4>
+        <p>Понять механизмы возврата клиентов после длительного перерыва, определить наиболее эффективные механики реактивации и сформировать инструменты для перевода возвращённых в постоянных.</p>
+        <div class="goals-result">Бизнес-цель: рост возврата клиентов и усиление CRM-реактивации</div>
+      </div>
+      <div class="goals-qs">
+        <h4>Вопросы исследования</h4>
+        <ul>
+          <li>Какие факторы и события чаще всего становятся поводом для возвращения?</li>
+          <li>Какую роль играют коммуникации FaceRoom, предложения и напоминания?</li>
+          <li>Какие барьеры по-прежнему мешают сформировать регулярность?</li>
+          <li>Какие продукты и программы повысят вероятность удержания после возврата?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="analysis">
+    <h3>Выводы по целям исследования</h3>
+    <div class="ai-items">
+      <div class="ai"><div class="ai-num voz">77%</div>
+        <div class="ai-txt"><strong>Главный триггер возврата — внутреннее желание.</strong> 77% возвращаются когда появляется желание уделить внимание себе. CRM не создаёт это желание, но может поймать нужный момент и стать последним толчком.</div></div>
+      <div class="ai"><div class="ai-num voz">44%</div>
+        <div class="ai-txt"><strong>CRM-коммуникация подтверждена данными.</strong> 44% называют напоминание или предложение от FaceRoom поводом записаться. Вместе с теми кто реагирует на выгодные офферы — это значимая часть аудитории, управляемая через CRM.</div></div>
+      <div class="ai"><div class="ai-num voz">73%</div>
+        <div class="ai-txt"><strong>Бонусная программа — конкретный продуктовый запрос.</strong> 73% выбрали «бонусы и привилегии при регулярном посещении» как самый желанный формат — с большим отрывом. Это не абстрактное пожелание, а готовый продуктовый запрос.</div></div>
+      <div class="ai"><div class="ai-num acc">77%</div>
+        <div class="ai-txt"><strong>Ценовая чувствительность не уходит после возврата.</strong> 77% хотят более выгодных условий — столько же, сколько и постоянные. Без программы удержания с ценовой составляющей велик риск повторного оттока.</div></div>
+    </div>
+  </div>
+  <div class="charts" id="voz-charts"></div>
+</div>
+
+<!-- КОСМЕТОЛОГИЯ -->
+<div class="tab-content" id="tab-kos">
+  <div class="section-title">Потенциал аудитории для клиники косметологии</div>
+  <div class="kos-row" id="kos-cards"></div>
+  <div class="analysis">
+    <h3>Выводы</h3>
+    <div class="ai-items">
+      <div class="ai"><div class="ai-num post">76%</div>
+        <div class="ai-txt"><strong>Большинство постоянных открыты к косметологии.</strong> 76% ответили «Да» или «Возможно» на вопрос об открытии клиники. Это значимый потенциальный спрос — особенно с учётом доверия к бренду и привычки к регулярным визитам.</div></div>
+      <div class="ai"><div class="ai-num voz">40%</div>
+        <div class="ai-txt"><strong>Возвращённые — неожиданно самый «косметологический» сегмент.</strong> 40% уже используют аппаратную или инъекционную косметологию — втрое больше чем постоянные (15%). Этот сегмент имеет сложившийся потребительский паттерн и скорее всего сравнивает предложения на рынке.</div></div>
+      <div class="ai"><div class="ai-num ush">21%</div>
+        <div class="ai-txt"><strong>Часть ушедших уже у косметологов.</strong> 21% ушедших используют аппаратную или инъекционную косметологию. Открытие клиники создаёт дополнительный повод для реактивации этой аудитории через новый продукт.</div></div>
+      <div class="ai"><div class="ai-num acc">17%</div>
+        <div class="ai-txt"><strong>Запрос на косметологию в форматах — пока нишевый.</strong> Только 17% возвращённых выбрали косметологию как желанный формат. Открытие клиники требует отдельного позиционирования без расчёта на автоматический переток текущей базы.</div></div>
+    </div>
+  </div>
+  <div class="charts">
+    <div class="chart-row cols2">
+      <div class="chart-card"><h3>Постоянные: актуально открытие клиники?</h3><div class="sub">Прямой вопрос о новом продукте</div><canvas id="kos-kl" height="200"></canvas></div>
+      <div class="chart-card"><h3>Уже используют косметологию</h3><div class="sub">Доля отметивших аппаратную / инъекционную в практиках ухода, %</div><canvas id="kos-pr" height="200"></canvas></div>
+    </div>
+  </div>
+  <div style="margin-top:24px">
+    <div class="section-title">Что интересует в косметологии — свободные ответы</div>
+    <div id="kos-quotes" class="quotes-grid"></div>
+  </div>
+</div>
+
+<!-- СВОБОДНЫЕ ОТВЕТЫ -->
+<div class="tab-content" id="tab-ft">
+  <div class="section-title">Свободные ответы клиентов</div>
+  <div class="seg-filter">
+    <button class="seg-flt active" data-seg="all">Все сегменты</button>
+    <button class="seg-flt" data-seg="постоянные">Постоянные</button>
+    <button class="seg-flt" data-seg="ушедшие">Ушедшие</button>
+    <button class="seg-flt" data-seg="возвращенные">Возвращённые</button>
+  </div>
+  <div class="chart-card" style="margin-bottom:20px;max-width:500px">
+    <h3>Распределение тем</h3>
+    <div class="sub">% ответов по теме</div>
+    <canvas id="ft-chart" height="220"></canvas>
+  </div>
+  <div id="ft-cats" class="cat-chips"></div>
+  <div id="ft-count" style="font-size:12px;color:var(--muted);margin-bottom:16px"></div>
+  <div id="ft-quotes" class="quotes-grid"></div>
+</div>
+
+</div><!-- /main -->
+<script>
+const RAW = {"постоянные": {"all": {"n": 91, "возраст": {"36–45": 48, "26–35": 17, "46–55": 13, "56+": 12, "18–25": 1}, "роль_ухода": {"Это важно для меня, но не всегда хватает времени": 51, "Это важная часть моего образа жизни": 28, "Уделяю этому внимание время от времени": 11, "Обычно занимаюсь этим только при необходимости": 1}, "практики": {"Массаж лица": 87, "Домашний уход за лицом и телом": 67, "Регулярная физическая активность": 59, "Массаж тела": 46, "Регулярные медицинские обследования, профилактика здоровья": 37, "СПА, бани или термальные комплексы": 29, "Инъекционная косметология": 11, "Медитация, дыхательные практики": 11, "Аппаратная косметология": 8}, "косметология_практики_n": 14, "когда_привычка": {"Практически сразу после первого визита": 65, "Постепенно вошло в привычку": 11, "В течение первого месяца": 10, "Не могу выделить конкретный момент": 4, "В течение первых 2–3 месяцев": 1}, "что_привлекло": {"Конкретный специалист": 52, "Атмосфера студии": 49, "Удобство расположения": 48, "Видимый результат": 46, "Забота и внимание со стороны сотрудников": 45, "Удобство записи и планирования визитов": 30, "Система абонементов или депозитов": 24, "Акции или специальные предложения": 23, "Стоимость услуг была оправдана получаемым результатом": 12}, "что_ценно": {"Возможность расслабиться и восстановиться": 72, "Атмосфера и комфорт": 48, "Профилактика возрастных изменений": 47, "Профессионализм специалистов": 45, "Стабильность качества услуг": 36, "Видимые изменения во внешности": 27, "Высокий уровень сервиса": 22, "Индивидуальный подход": 19, "Соотношение цены и качества": 14}, "если_спец_уйдет": {"Сначала попробую сходить к другому специалисту в FaceRoom": 53, "Продолжу посещать FaceRoom и выберу другого специалиста": 17, "Затрудняюсь ответить": 13, "Скорее всего стану искать своего специалиста в другом месте": 8}, "что_помогло_чаще": {"Более выгодные условия посещения": 65, "Уже посещаю с комфортной частотой": 33, "Возможность записи в удобное для меня время": 11, "Удобство записи к нужному специалисту": 10, "Персональный план ухода от специалиста": 9, "Более прогнозируемый и стабильный результат": 3, "Поддержка и напоминания между визитами": 2}, "косметология_клиника": {"Возможно": 50, "Не актуально": 22, "Да": 19}, "косметология_потенциал_n": 69, "свободный": [{"text": "Здравствуйте!\nХотелось бы более камерное пространство во время прохождения процедур, возможно ширму или занавес", "city": "Санкт-Петербург"}, {"text": "Возможность записи онлайн, пока не работает. Возможность покупать совместный депозит, например по одного депозиту/абонементу  ходить с мамой, подругой. ", "city": "Санкт-Петербург"}, {"text": "Мне нечего добавить, очень вас любим всей семьёй ", "city": "Санкт-Петербург"}, {"text": "У меня выявилась аллергия на косметику фейсрум и теперь нужно докупать опцию для использования другой косметики, это очень неудобно и дорого. ", "city": "Санкт-Петербург"}, {"text": "Было бы здорово, если бы расширилась линейка косметики, которая продается в салонах, появятся новые отличные и качественные бренды ценового сегмента пониже, чем текущие, для альтернативы.", "city": "Санкт-Петербург"}, {"text": "Чтобы была возможность проводить некоторые процедуры без массажа лица (такие как пилинг и аппаратные, как Елизарова)", "city": "Санкт-Петербург"}, {"text": "- инъекционная косметология, но только если речь об очень опытных специалистах обязательно с мед образованием и хорошим стажем работы в этой области;\n- большее разнообразие в средствах: желтый пилинг, тыквенный и пр.\n- как доп услуга возможность покрасить брови и ресницы ", "city": "Санкт-Петербург"}, {"text": "Просить клиентов не разговаривать в полный голос во время массажа", "city": "Санкт-Петербург"}, {"text": "Было бы здорово, если бы во время процедур с лицом можно было бы ухаживать и за кожей рук, например, сделав маску или что-то еще.", "city": "Москва"}, {"text": "сейчас нет специалиста по лицу, который бы меня полностью устраивал", "city": "Санкт-Петербург"}, {"text": "Всё замечательно ", "city": "Санкт-Петербург"}, {"text": "Отдельные помещения для каждого клиента или какое нибудь разделение между креслами. Т.к. клиенты иногда забывают что не одни и громко разговаривают.", "city": "Санкт-Петербург"}, {"text": "Так как я пользуюсь услугами через фитмост я бы хотела пробовать и другие процедуры, которых к сожалению нет в расписании (например пилинг лица).", "city": "Уфа"}, {"text": "Локация для меня неудобная, но как на это повлияешь? Вам развития и процветания!!!", "city": "Москва"}, {"text": "Для начала поменять локацию и помещение ,больше пространства хочется . Решить вопрос с парковкой ,это вечная проблема ", "city": "Уфа"}, {"text": "Спасибо за качественный сервис", "city": "Уфа"}, {"text": "Я посещаю faceroom  около 7 лет.\nЭто мой любимый салон. Мне нравятся многие специалисты и даже интересно бывать у разных.\nКонечно цены кусаются, но стараюсь периодически ходить .", "city": "Москва"}, {"text": "Мне кажется что вы нашли идеальный баланс цена-качество. Я была бы благодарна если бы специалисты показывали мне что я могу сделать с лицом дома сама. Какие точки конкретно мне нужно массировать, чтобы поддержать эффект. У вас прекрасные специалисты, я обожаю Анастасию администратора. Я не сразу нашла своих мастеров, но после поисков я уверена что приду и отдохну. Огромное вам спасибо за ваш труд. Вы сделали отличное место для отдыха для городских занятых женщин. Я очень рада что однажды узнала про вас. \nВ чем можно было бы усилиться? Я помню что в другой сети салонов совершенно потрясающая косметика по аромату и это добавляло расслабления и ощущений. У вас ароматы скорее аскетичные и не запоминающие. ", "city": "Санкт-Петербург"}, {"text": "Затрудняюсь ответить, все нравится!!", "city": "Москва"}, {"text": "Побольше акций и клиентских дней!", "city": "Санкт-Петербург"}, {"text": "Мне все нравится, больше люблю отдельные кабинеты, но это не стиль fr", "city": "Санкт-Петербург"}, {"text": "Сделать двери между залом , где проходят процедуры и входной зоной. Это единственное, что раздражает. Иногда ощущение, что процедуры проходят в прихожей.", "city": "Санкт-Петербург"}, {"text": "Затрудняюсь ответить.", "city": "нет в базе"}, {"text": "Абсолютно все устраивает", "city": "Санкт-Петербург"}, {"text": "Ширмы между креслами ", "city": "Санкт-Петербург"}, {"text": "Все прекрасно. Спасибо большое за заботу!", "city": "Санкт-Петербург"}, {"text": "В студиях, которые я посещала, были общие залы для мужчин и женщин с несколькими креслами. Хотелось бы раздельное посещение: если не индивидуальные комнаты, то разные для мужчин и женщин. Некомфортно переодеваться. В некоторых студиях из входной зоны и где производят оплату видно раздевающихся людей. Можно подумать, как это улучшить. \n", "city": "Санкт-Петербург"}, {"text": "У меня нет нареканий :) ", "city": "Санкт-Петербург"}, {"text": "Добавить другие практики по уходу на за лицом. \nБолее внимательно отнестись к выбору администратора.  ", "city": "Санкт-Петербург"}, {"text": "Более приватные залы для массажа лица, возможно хотя бы ширмы", "city": "Санкт-Петербург"}, {"text": "Все хорошо, может быть больше акций и бонусов)", "city": "Уфа"}, {"text": "Ширмы между креслами, для ощущения уединения", "city": "Санкт-Петербург"}, {"text": "Консультации по состоянию кожи с рекомендациями не только по спектру услуг/товаров фэйс рум, но советами по средствам домашнего ухода, аппаратной косметологии и т.п. \nЧасы работы в более позднее время до 11 вечера, чтобы после работы можно было успеть на тренировку, а потом на массаж. \nУслуга в 4 руки, когда одновременно делают массаж лица и маникюр.", "city": "Санкт-Петербург"}], "косметология_интересы": [{"text": "Массаж , уход домашний , ботокс ", "city": "Москва"}, {"text": "Лимфодренаж, ", "city": "Санкт-Петербург"}, {"text": "Массаж, маски", "city": "Санкт-Петербург"}, {"text": "Массаж, миофасциальный масс аж", "city": "Уфа"}, {"text": "Процедуры для качества кожи ", "city": "Уфа"}, {"text": "Аппаратная косметология ", "city": "Уфа"}, {"text": "Аппаратная косметология", "city": "Уфа"}, {"text": "Аппаратные технологии ", "city": "Санкт-Петербург"}]}, "Санкт-Петербург": {"n": 62, "возраст": {"36–45": 37, "26–35": 10, "46–55": 9, "56+": 5, "18–25": 1}, "роль_ухода": {"Это важно для меня, но не всегда хватает времени": 36, "Это важная часть моего образа жизни": 17, "Уделяю этому внимание время от времени": 8, "Обычно занимаюсь этим только при необходимости": 1}, "практики": {"Массаж лица": 58, "Домашний уход за лицом и телом": 46, "Регулярная физическая активность": 39, "Массаж тела": 32, "Регулярные медицинские обследования, профилактика здоровья": 26, "СПА, бани или термальные комплексы": 19, "Медитация, дыхательные практики": 9, "Инъекционная косметология": 6, "Аппаратная косметология": 3}, "косметология_практики_n": 7, "когда_привычка": {"Практически сразу после первого визита": 44, "Постепенно вошло в привычку": 8, "В течение первого месяца": 7, "Не могу выделить конкретный момент": 3}, "что_привлекло": {"Конкретный специалист": 37, "Атмосфера студии": 36, "Удобство расположения": 36, "Забота и внимание со стороны сотрудников": 28, "Видимый результат": 24, "Удобство записи и планирования визитов": 23, "Система абонементов или депозитов": 15, "Акции или специальные предложения": 13, "Стоимость услуг была оправдана получаемым результатом": 4}, "что_ценно": {"Возможность расслабиться и восстановиться": 49, "Атмосфера и комфорт": 34, "Профилактика возрастных изменений": 33, "Профессионализм специалистов": 29, "Стабильность качества услуг": 27, "Высокий уровень сервиса": 16, "Видимые изменения во внешности": 14, "Индивидуальный подход": 14, "Соотношение цены и качества": 9}, "если_спец_уйдет": {"Сначала попробую сходить к другому специалисту в FaceRoom": 39, "Затрудняюсь ответить": 9, "Скорее всего стану искать своего специалиста в другом месте": 7, "Продолжу посещать FaceRoom и выберу другого специалиста": 7}, "что_помогло_чаще": {"Более выгодные условия посещения": 46, "Уже посещаю с комфортной частотой": 21, "Возможность записи в удобное для меня время": 10, "Удобство записи к нужному специалисту": 6, "Персональный план ухода от специалиста": 6, "Более прогнозируемый и стабильный результат": 3, "Поддержка и напоминания между визитами": 1}, "косметология_клиника": {"Возможно": 29, "Не актуально": 20, "Да": 13}, "косметология_потенциал_n": 42, "свободный": [{"text": "Здравствуйте!\nХотелось бы более камерное пространство во время прохождения процедур, возможно ширму или занавес", "city": "Санкт-Петербург"}, {"text": "Возможность записи онлайн, пока не работает. Возможность покупать совместный депозит, например по одного депозиту/абонементу  ходить с мамой, подругой. ", "city": "Санкт-Петербург"}, {"text": "Мне нечего добавить, очень вас любим всей семьёй ", "city": "Санкт-Петербург"}, {"text": "У меня выявилась аллергия на косметику фейсрум и теперь нужно докупать опцию для использования другой косметики, это очень неудобно и дорого. ", "city": "Санкт-Петербург"}, {"text": "Было бы здорово, если бы расширилась линейка косметики, которая продается в салонах, появятся новые отличные и качественные бренды ценового сегмента пониже, чем текущие, для альтернативы.", "city": "Санкт-Петербург"}, {"text": "Чтобы была возможность проводить некоторые процедуры без массажа лица (такие как пилинг и аппаратные, как Елизарова)", "city": "Санкт-Петербург"}, {"text": "- инъекционная косметология, но только если речь об очень опытных специалистах обязательно с мед образованием и хорошим стажем работы в этой области;\n- большее разнообразие в средствах: желтый пилинг, тыквенный и пр.\n- как доп услуга возможность покрасить брови и ресницы ", "city": "Санкт-Петербург"}, {"text": "Просить клиентов не разговаривать в полный голос во время массажа", "city": "Санкт-Петербург"}, {"text": "сейчас нет специалиста по лицу, который бы меня полностью устраивал", "city": "Санкт-Петербург"}, {"text": "Всё замечательно ", "city": "Санкт-Петербург"}, {"text": "Отдельные помещения для каждого клиента или какое нибудь разделение между креслами. Т.к. клиенты иногда забывают что не одни и громко разговаривают.", "city": "Санкт-Петербург"}, {"text": "Мне кажется что вы нашли идеальный баланс цена-качество. Я была бы благодарна если бы специалисты показывали мне что я могу сделать с лицом дома сама. Какие точки конкретно мне нужно массировать, чтобы поддержать эффект. У вас прекрасные специалисты, я обожаю Анастасию администратора. Я не сразу нашла своих мастеров, но после поисков я уверена что приду и отдохну. Огромное вам спасибо за ваш труд. Вы сделали отличное место для отдыха для городских занятых женщин. Я очень рада что однажды узнала про вас. \nВ чем можно было бы усилиться? Я помню что в другой сети салонов совершенно потрясающая косметика по аромату и это добавляло расслабления и ощущений. У вас ароматы скорее аскетичные и не запоминающие. ", "city": "Санкт-Петербург"}, {"text": "Побольше акций и клиентских дней!", "city": "Санкт-Петербург"}, {"text": "Мне все нравится, больше люблю отдельные кабинеты, но это не стиль fr", "city": "Санкт-Петербург"}, {"text": "Сделать двери между залом , где проходят процедуры и входной зоной. Это единственное, что раздражает. Иногда ощущение, что процедуры проходят в прихожей.", "city": "Санкт-Петербург"}, {"text": "Абсолютно все устраивает", "city": "Санкт-Петербург"}, {"text": "Ширмы между креслами ", "city": "Санкт-Петербург"}, {"text": "Все прекрасно. Спасибо большое за заботу!", "city": "Санкт-Петербург"}, {"text": "В студиях, которые я посещала, были общие залы для мужчин и женщин с несколькими креслами. Хотелось бы раздельное посещение: если не индивидуальные комнаты, то разные для мужчин и женщин. Некомфортно переодеваться. В некоторых студиях из входной зоны и где производят оплату видно раздевающихся людей. Можно подумать, как это улучшить. \n", "city": "Санкт-Петербург"}, {"text": "У меня нет нареканий :) ", "city": "Санкт-Петербург"}, {"text": "Добавить другие практики по уходу на за лицом. \nБолее внимательно отнестись к выбору администратора.  ", "city": "Санкт-Петербург"}, {"text": "Более приватные залы для массажа лица, возможно хотя бы ширмы", "city": "Санкт-Петербург"}, {"text": "Ширмы между креслами, для ощущения уединения", "city": "Санкт-Петербург"}, {"text": "Консультации по состоянию кожи с рекомендациями не только по спектру услуг/товаров фэйс рум, но советами по средствам домашнего ухода, аппаратной косметологии и т.п. \nЧасы работы в более позднее время до 11 вечера, чтобы после работы можно было успеть на тренировку, а потом на массаж. \nУслуга в 4 руки, когда одновременно делают массаж лица и маникюр.", "city": "Санкт-Петербург"}], "косметология_интересы": [{"text": "Лимфодренаж, ", "city": "Санкт-Петербург"}, {"text": "Массаж, маски", "city": "Санкт-Петербург"}, {"text": "Аппаратные технологии ", "city": "Санкт-Петербург"}]}, "Москва": {"n": 17, "возраст": {"36–45": 7, "26–35": 4, "56+": 4, "46–55": 2}, "роль_ухода": {"Это важная часть моего образа жизни": 8, "Это важно для меня, но не всегда хватает времени": 7, "Уделяю этому внимание время от времени": 2}, "практики": {"Массаж лица": 17, "Домашний уход за лицом и телом": 12, "Регулярная физическая активность": 11, "Массаж тела": 9, "Регулярные медицинские обследования, профилактика здоровья": 6, "СПА, бани или термальные комплексы": 6, "Инъекционная косметология": 3, "Аппаратная косметология": 2, "Медитация, дыхательные практики": 1}, "косметология_практики_n": 3, "когда_привычка": {"Практически сразу после первого визита": 13, "В течение первого месяца": 2, "Постепенно вошло в привычку": 1, "В течение первых 2–3 месяцев": 1}, "что_привлекло": {"Видимый результат": 12, "Забота и внимание со стороны сотрудников": 11, "Акции или специальные предложения": 7, "Конкретный специалист": 7, "Удобство расположения": 7, "Атмосфера студии": 7, "Система абонементов или депозитов": 5, "Стоимость услуг была оправдана получаемым результатом": 5, "Удобство записи и планирования визитов": 5}, "что_ценно": {"Возможность расслабиться и восстановиться": 14, "Видимые изменения во внешности": 9, "Атмосфера и комфорт": 9, "Профессионализм специалистов": 9, "Профилактика возрастных изменений": 5, "Стабильность качества услуг": 4, "Высокий уровень сервиса": 3, "Соотношение цены и качества": 3, "Индивидуальный подход": 2}, "если_спец_уйдет": {"Продолжу посещать FaceRoom и выберу другого специалиста": 8, "Сначала попробую сходить к другому специалисту в FaceRoom": 6, "Затрудняюсь ответить": 2, "Скорее всего стану искать своего специалиста в другом месте": 1}, "что_помогло_чаще": {"Более выгодные условия посещения": 14, "Уже посещаю с комфортной частотой": 5, "Персональный план ухода от специалиста": 2, "Удобство записи к нужному специалисту": 2, "Поддержка и напоминания между визитами": 1}, "косметология_клиника": {"Возможно": 11, "Да": 5, "Не актуально": 1}, "косметология_потенциал_n": 16, "свободный": [{"text": "Было бы здорово, если бы во время процедур с лицом можно было бы ухаживать и за кожей рук, например, сделав маску или что-то еще.", "city": "Москва"}, {"text": "Локация для меня неудобная, но как на это повлияешь? Вам развития и процветания!!!", "city": "Москва"}, {"text": "Я посещаю faceroom  около 7 лет.\nЭто мой любимый салон. Мне нравятся многие специалисты и даже интересно бывать у разных.\nКонечно цены кусаются, но стараюсь периодически ходить .", "city": "Москва"}, {"text": "Затрудняюсь ответить, все нравится!!", "city": "Москва"}], "косметология_интересы": [{"text": "Массаж , уход домашний , ботокс ", "city": "Москва"}]}, "Уфа": {"n": 7, "возраст": {"26–35": 2, "56+": 2, "36–45": 2, "46–55": 1}, "роль_ухода": {"Это важно для меня, но не всегда хватает времени": 4, "Это важная часть моего образа жизни": 2, "Уделяю этому внимание время от времени": 1}, "практики": {"Массаж лица": 7, "Домашний уход за лицом и телом": 6, "Регулярная физическая активность": 6, "Регулярные медицинские обследования, профилактика здоровья": 3, "Аппаратная косметология": 3, "Массаж тела": 3, "Инъекционная косметология": 2, "СПА, бани или термальные комплексы": 1, "Медитация, дыхательные практики": 1}, "косметология_практики_n": 4, "когда_привычка": {"Практически сразу после первого визита": 4, "Постепенно вошло в привычку": 2, "В течение первого месяца": 1}, "что_привлекло": {"Видимый результат": 6, "Конкретный специалист": 5, "Забота и внимание со стороны сотрудников": 4, "Удобство расположения": 3, "Атмосфера студии": 3, "Система абонементов или депозитов": 2, "Удобство записи и планирования визитов": 1, "Стоимость услуг была оправдана получаемым результатом": 1, "Акции или специальные предложения": 1}, "что_ценно": {"Профилактика возрастных изменений": 6, "Возможность расслабиться и восстановиться": 5, "Профессионализм специалистов": 4, "Атмосфера и комфорт": 3, "Высокий уровень сервиса": 2, "Стабильность качества услуг": 2, "Видимые изменения во внешности": 1, "Индивидуальный подход": 1}, "если_спец_уйдет": {"Сначала попробую сходить к другому специалисту в FaceRoom": 5, "Продолжу посещать FaceRoom и выберу другого специалиста": 1, "Затрудняюсь ответить": 1}, "что_помогло_чаще": {"Уже посещаю с комфортной частотой": 4, "Более выгодные условия посещения": 3, "Удобство записи к нужному специалисту": 1, "Возможность записи в удобное для меня время": 1}, "косметология_клиника": {"Возможно": 6, "Да": 1}, "косметология_потенциал_n": 7, "свободный": [{"text": "Так как я пользуюсь услугами через фитмост я бы хотела пробовать и другие процедуры, которых к сожалению нет в расписании (например пилинг лица).", "city": "Уфа"}, {"text": "Для начала поменять локацию и помещение ,больше пространства хочется . Решить вопрос с парковкой ,это вечная проблема ", "city": "Уфа"}, {"text": "Спасибо за качественный сервис", "city": "Уфа"}, {"text": "Все хорошо, может быть больше акций и бонусов)", "city": "Уфа"}], "косметология_интересы": [{"text": "Массаж, миофасциальный масс аж", "city": "Уфа"}, {"text": "Процедуры для качества кожи ", "city": "Уфа"}, {"text": "Аппаратная косметология ", "city": "Уфа"}, {"text": "Аппаратная косметология", "city": "Уфа"}]}}, "ушедшие": {"all": {"n": 52, "возраст": {"36–45": 24, "26–35": 17, "46–55": 6, "18–25": 4, "56+": 1}, "роль_ухода": {"Это важно для меня, но не всегда хватает времени": 25, "Уделяю этому внимание время от времени": 15, "Это важная часть моего образа жизни": 11, "Обычно занимаюсь этим только при необходимости": 1}, "практики": {"Домашний уход за лицом и телом": 40, "Массаж лица": 33, "Регулярная физическая активность": 30, "Массаж тела": 26, "Регулярные медицинские обследования, профилактика здоровья": 23, "СПА, бани или термальные комплексы": 20, "Медитация, дыхательные практики": 12, "Инъекционная косметология": 8, "Аппаратная косметология": 7}, "косметология_практики_n": 11, "что_важно_при_выборе": {"Квалификация специалистов": 38, "Стоимость": 37, "Удобство расположения": 35, "Видимый результат": 34, "Атмосфера": 32, "Безопасность и доверие": 30, "Удобство записи": 21, "Индивидуальный подход": 15, "Рекомендации знакомых": 8}, "ситуация_сейчас": {"Продолжаю заботиться о себе, но делаю это реже, чем раньше": 36, "Сейчас мне больше подходят другие услуги и способы регулярного ухода за собой": 9, "Продолжаю регулярно заботиться о себе, но выбираю другие студии": 6, "Тема ухода за собой стала менее актуальна для меня": 1}, "что_было_ценным": {"Возможность расслабиться и восстановиться": 36, "Конкретный специалист": 27, "Атмосфера и комфорт": 25, "Видимый результат": 25, "Высокий уровень сервиса": 19, "Соотношение цены и качества": 18, "Удобство записи": 17, "Индивидуальный подход": 11}, "причины_оттока": {"Изменились финансовые приоритеты": 24, "Не хватало времени": 18, "Изменились жизненные обстоятельства": 13, "Стала выбирать другие услуги или студии": 9, "Не всегда удавалось записаться в удобное время": 8, "Не ощущала достаточной ценности относительно стоимости услуг": 5, "Не всегда удавалось записаться к нужному специалисту": 5, "Перестала видеть заметный результат от посещений": 1}, "где_сейчас": {"Использую только домашние практики ухода (самомассаж, фейс-фитнес, домашний уход)": 16, "Не пользуюсь подобными услугами сейчас": 14, "В другой специализированной студии массажа лица или тела": 11, "В салоне красоты или косметологической клинике": 7, "У частного специалиста": 4}, "свободный": [{"text": "Вернула бы старые практики", "city": "Санкт-Петербург"}, {"text": "Расширить ассортимент товаров, добавить хорошую бюджетную линейку.\nПериодически проводить акции интересные, например 3 массажа на все тело по цене 2х.\nПриглашать постоянных клиентов тестировать новые позиции по сниженной цене. ", "city": "Уфа"}, {"text": "Снижение цены", "city": "Санкт-Петербург"}, {"text": "Больше салонов по городу, была бы рада, если бы появился салон в районе метро Ладожская или Большевиков, тогда я бы могла чаще посещать массаж. \n", "city": "Санкт-Петербург"}, {"text": "Стоимость услуг", "city": "Санкт-Петербург"}, {"text": "У вас все хорошо", "city": "Санкт-Петербург"}, {"text": "У ВАс все замечательно! Обязательно приду к Вам, как только вернусь из отпуска) ", "city": "Санкт-Петербург"}, {"text": "Напоминайте почаще приходить к вам ", "city": "Санкт-Петербург"}, {"text": "Я очень люблю сеть faceroom особенно на василеостровском и на комендантском.  В последний год я постоянно в разъездах но когда могу - забегаю. \n\nМне нравится именно массаж, а маски и уход я получаю у косметолога. Но в последнее время за тайминг услуги сократилось время массажа и увеличилось время просто уходовой процедуры. \nРазные специалисты по разному проводят процедуру. Кто-то спрашивает в начале \"сделать ли вам маску, какой выбрать уход и тп\", кто то спрашивает в конце перед нанесением маски или какими нибудь шарами, хочу ли я (а я даже не знаю что это, приходится вникнуть, тратится время) кто то вообще не спрашивает. Когда уже расслабился неохота принимать решение. ", "city": "Санкт-Петербург"}, {"text": "Чтобы у специалиста была возможность использовать разные способы чистки лица по его усмотрению там , где это необходимо для наилучшего результата.", "city": "Санкт-Петербург"}, {"text": "Больше акций. Например, было 8 марта и многие студии дарили подарки, устраивали розыгрыш, но у вас не было ничего. Хотя направленность сферы ваша именно женская. ", "city": "Санкт-Петербург"}, {"text": "Время работы. И нужная мне процедура карбокси есть только в одном месте. ", "city": "Москва"}, {"text": "Всё чудесно! Прихожу к вам именно расслабится. Можно добавить какие-нибудь комплексные программы расслабления)\nНапример и массаж и массаж лица и масочка и чаечек. Именно за раз, не запись отдельно.  Просто что бы переключится от всего)", "city": "Санкт-Петербург"}, {"text": "Поменьше разговоров во время массажа. Только по необходимости ", "city": "Санкт-Петербург"}, {"text": "Была бы рада открытию студии в новой Москве, в Троицке:)", "city": "Москва"}, {"text": "Больше интересных мероприятий для клиентов ", "city": "Санкт-Петербург"}], "косметология_интересы": [{"text": "Массаж ", "city": "Санкт-Петербург"}, {"text": "Уходы, аппараты, капельницы, массажи", "city": "Санкт-Петербург"}, {"text": "Аппаратная косметология", "city": "Москва"}, {"text": "аппаратная косметология", "city": "Санкт-Петербург"}, {"text": "Биоревитализация ", "city": "Санкт-Петербург"}, {"text": "Ботокс", "city": "Санкт-Петербург"}]}, "Санкт-Петербург": {"n": 43, "возраст": {"36–45": 19, "26–35": 13, "46–55": 6, "18–25": 4, "56+": 1}, "роль_ухода": {"Это важно для меня, но не всегда хватает времени": 20, "Уделяю этому внимание время от времени": 12, "Это важная часть моего образа жизни": 10, "Обычно занимаюсь этим только при необходимости": 1}, "практики": {"Домашний уход за лицом и телом": 32, "Массаж лица": 27, "Регулярная физическая активность": 24, "Регулярные медицинские обследования, профилактика здоровья": 22, "Массаж тела": 21, "СПА, бани или термальные комплексы": 17, "Медитация, дыхательные практики": 10, "Инъекционная косметология": 7, "Аппаратная косметология": 5}, "косметология_практики_n": 9, "что_важно_при_выборе": {"Квалификация специалистов": 31, "Стоимость": 30, "Видимый результат": 29, "Удобство расположения": 28, "Атмосфера": 25, "Безопасность и доверие": 24, "Удобство записи": 17, "Индивидуальный подход": 11, "Рекомендации знакомых": 7}, "ситуация_сейчас": {"Продолжаю заботиться о себе, но делаю это реже, чем раньше": 30, "Сейчас мне больше подходят другие услуги и способы регулярного ухода за собой": 7, "Продолжаю регулярно заботиться о себе, но выбираю другие студии": 5, "Тема ухода за собой стала менее актуальна для меня": 1}, "что_было_ценным": {"Возможность расслабиться и восстановиться": 30, "Конкретный специалист": 25, "Видимый результат": 21, "Атмосфера и комфорт": 20, "Высокий уровень сервиса": 15, "Соотношение цены и качества": 15, "Удобство записи": 12, "Индивидуальный подход": 9}, "причины_оттока": {"Изменились финансовые приоритеты": 21, "Не хватало времени": 17, "Изменились жизненные обстоятельства": 11, "Стала выбирать другие услуги или студии": 9, "Не всегда удавалось записаться в удобное время": 5, "Не ощущала достаточной ценности относительно стоимости услуг": 4, "Не всегда удавалось записаться к нужному специалисту": 4}, "где_сейчас": {"Использую только домашние практики ухода (самомассаж, фейс-фитнес, домашний уход)": 14, "Не пользуюсь подобными услугами сейчас": 10, "В другой специализированной студии массажа лица или тела": 10, "В салоне красоты или косметологической клинике": 6, "У частного специалиста": 3}, "свободный": [{"text": "Вернула бы старые практики", "city": "Санкт-Петербург"}, {"text": "Снижение цены", "city": "Санкт-Петербург"}, {"text": "Больше салонов по городу, была бы рада, если бы появился салон в районе метро Ладожская или Большевиков, тогда я бы могла чаще посещать массаж. \n", "city": "Санкт-Петербург"}, {"text": "Стоимость услуг", "city": "Санкт-Петербург"}, {"text": "У вас все хорошо", "city": "Санкт-Петербург"}, {"text": "У ВАс все замечательно! Обязательно приду к Вам, как только вернусь из отпуска) ", "city": "Санкт-Петербург"}, {"text": "Напоминайте почаще приходить к вам ", "city": "Санкт-Петербург"}, {"text": "Я очень люблю сеть faceroom особенно на василеостровском и на комендантском.  В последний год я постоянно в разъездах но когда могу - забегаю. \n\nМне нравится именно массаж, а маски и уход я получаю у косметолога. Но в последнее время за тайминг услуги сократилось время массажа и увеличилось время просто уходовой процедуры. \nРазные специалисты по разному проводят процедуру. Кто-то спрашивает в начале \"сделать ли вам маску, какой выбрать уход и тп\", кто то спрашивает в конце перед нанесением маски или какими нибудь шарами, хочу ли я (а я даже не знаю что это, приходится вникнуть, тратится время) кто то вообще не спрашивает. Когда уже расслабился неохота принимать решение. ", "city": "Санкт-Петербург"}, {"text": "Чтобы у специалиста была возможность использовать разные способы чистки лица по его усмотрению там , где это необходимо для наилучшего результата.", "city": "Санкт-Петербург"}, {"text": "Больше акций. Например, было 8 марта и многие студии дарили подарки, устраивали розыгрыш, но у вас не было ничего. Хотя направленность сферы ваша именно женская. ", "city": "Санкт-Петербург"}, {"text": "Всё чудесно! Прихожу к вам именно расслабится. Можно добавить какие-нибудь комплексные программы расслабления)\nНапример и массаж и массаж лица и масочка и чаечек. Именно за раз, не запись отдельно.  Просто что бы переключится от всего)", "city": "Санкт-Петербург"}, {"text": "Поменьше разговоров во время массажа. Только по необходимости ", "city": "Санкт-Петербург"}, {"text": "Больше интересных мероприятий для клиентов ", "city": "Санкт-Петербург"}], "косметология_интересы": [{"text": "Массаж ", "city": "Санкт-Петербург"}, {"text": "Уходы, аппараты, капельницы, массажи", "city": "Санкт-Петербург"}, {"text": "аппаратная косметология", "city": "Санкт-Петербург"}, {"text": "Биоревитализация ", "city": "Санкт-Петербург"}, {"text": "Ботокс", "city": "Санкт-Петербург"}]}, "Москва": {"n": 8, "возраст": {"26–35": 4, "36–45": 4}, "роль_ухода": {"Это важно для меня, но не всегда хватает времени": 4, "Уделяю этому внимание время от времени": 3, "Это важная часть моего образа жизни": 1}, "практики": {"Домашний уход за лицом и телом": 7, "Регулярная физическая активность": 6, "Массаж лица": 5, "Массаж тела": 4, "СПА, бани или термальные комплексы": 3, "Медитация, дыхательные практики": 2, "Аппаратная косметология": 2, "Инъекционная косметология": 1, "Регулярные медицинские обследования, профилактика здоровья": 1}, "косметология_практики_n": 2, "что_важно_при_выборе": {"Удобство расположения": 7, "Стоимость": 7, "Безопасность и доверие": 6, "Квалификация специалистов": 6, "Атмосфера": 6, "Удобство записи": 4, "Видимый результат": 4, "Индивидуальный подход": 3, "Рекомендации знакомых": 1}, "ситуация_сейчас": {"Продолжаю заботиться о себе, но делаю это реже, чем раньше": 5, "Сейчас мне больше подходят другие услуги и способы регулярного ухода за собой": 2, "Продолжаю регулярно заботиться о себе, но выбираю другие студии": 1}, "что_было_ценным": {"Возможность расслабиться и восстановиться": 5, "Атмосфера и комфорт": 4, "Удобство записи": 4, "Высокий уровень сервиса": 3, "Соотношение цены и качества": 3, "Видимый результат": 3, "Конкретный специалист": 2, "Индивидуальный подход": 1}, "причины_оттока": {"Изменились финансовые приоритеты": 3, "Изменились жизненные обстоятельства": 2, "Не всегда удавалось записаться в удобное время": 2, "Не ощущала достаточной ценности относительно стоимости услуг": 1, "Перестала видеть заметный результат от посещений": 1, "Не всегда удавалось записаться к нужному специалисту": 1, "Не хватало времени": 1}, "где_сейчас": {"Не пользуюсь подобными услугами сейчас": 4, "В другой специализированной студии массажа лица или тела": 1, "В салоне красоты или косметологической клинике": 1, "Использую только домашние практики ухода (самомассаж, фейс-фитнес, домашний уход)": 1, "У частного специалиста": 1}, "свободный": [{"text": "Время работы. И нужная мне процедура карбокси есть только в одном месте. ", "city": "Москва"}, {"text": "Была бы рада открытию студии в новой Москве, в Троицке:)", "city": "Москва"}], "косметология_интересы": [{"text": "Аппаратная косметология", "city": "Москва"}]}, "Уфа": {"n": 1, "возраст": {"36–45": 1}, "роль_ухода": {"Это важно для меня, но не всегда хватает времени": 1}, "практики": {"Массаж лица": 1, "Массаж тела": 1, "Домашний уход за лицом и телом": 1}, "косметология_практики_n": 0, "что_важно_при_выборе": {"Видимый результат": 1, "Квалификация специалистов": 1, "Атмосфера": 1, "Индивидуальный подход": 1}, "ситуация_сейчас": {"Продолжаю заботиться о себе, но делаю это реже, чем раньше": 1}, "что_было_ценным": {"Видимый результат": 1, "Атмосфера и комфорт": 1, "Возможность расслабиться и восстановиться": 1, "Высокий уровень сервиса": 1, "Удобство записи": 1, "Индивидуальный подход": 1}, "причины_оттока": {"Не всегда удавалось записаться в удобное время": 1}, "где_сейчас": {"Использую только домашние практики ухода (самомассаж, фейс-фитнес, домашний уход)": 1}, "свободный": [{"text": "Расширить ассортимент товаров, добавить хорошую бюджетную линейку.\nПериодически проводить акции интересные, например 3 массажа на все тело по цене 2х.\nПриглашать постоянных клиентов тестировать новые позиции по сниженной цене. ", "city": "Уфа"}], "косметология_интересы": []}}, "возвращенные": {"all": {"n": 52, "возраст": {"36–45": 25, "26–35": 14, "46–55": 8, "56+": 4, "18–25": 1}, "роль_ухода": {"Это важно для меня, но не всегда хватает времени": 26, "Это важная часть моего образа жизни": 18, "Уделяю этому внимание время от времени": 8}, "практики": {"Массаж лица": 43, "Домашний уход за лицом и телом": 37, "Регулярная физическая активность": 35, "Массаж тела": 33, "Регулярные медицинские обследования, профилактика здоровья": 28, "СПА, бани или термальные комплексы": 19, "Аппаратная косметология": 17, "Инъекционная косметология": 12, "Медитация, дыхательные практики": 8}, "косметология_практики_n": 21, "что_важно_при_выборе": {"Квалификация специалистов": 39, "Видимый результат": 37, "Атмосфера": 36, "Стоимость": 30, "Удобство расположения": 28, "Безопасность и доверие": 23, "Удобство записи": 22, "Индивидуальный подход": 11, "Рекомендации знакомых": 4}, "поводы_вернуться": {"Появляется желание уделить больше внимания себе": 40, "Вспоминаю о хорошем опыте прошлых посещений": 24, "Получаю предложение или напоминание от FaceRoom": 23, "Появляется выгодное предложение ": 22, "Хочу вернуться к своему специалисту": 20, "Становится удобнее найти время для визита": 9, "Возникает конкретный запрос": 6}, "что_ценно": {"Возможность расслабиться и восстановиться": 40, "Профессионализм специалистов": 30, "Атмосфера и комфорт": 26, "Стабильность качества услуг": 25, "Профилактика возрастных изменений": 24, "Соотношение цены и качества": 13, "Видимые изменения во внешности": 13, "Высокий уровень сервиса": 13, "Индивидуальный подход": 3}, "что_помогло_чаще": {"Более выгодные условия посещения": 40, "Уже посещаю с комфортной частотой": 14, "Персональный план ухода от специалиста": 10, "Поддержка и напоминания между визитами": 6, "Возможность записи в удобное для меня время": 5, "Более прогнозируемый и стабильный результат": 3, "Удобство записи к нужному специалисту": 1}, "интересные_форматы": {"Дополнительные бонусы и привилегии при регулярном посещении": 38, "Короткие экспресс-услуги": 16, "Подписка на регулярный уход за собой": 11, "Косметологические услуги (аппаратная или инъекционная косметология)": 9, "Персональные программы ухода на несколько месяцев ": 9, "Мероприятия с экспертами и полезными практиками ": 8, "Новые услуги и программы ухода ": 8, "Пакеты услуг для решения конкретной задачи ": 7, "Дополнительное сопровождение и рекомендации между визитами ": 2}, "косметология_форматы_n": 9, "свободный": [{"text": "Просто спасибо вам за ваш салон! Очень люблю)", "city": "Москва"}, {"text": "В части массажа тела интересуют массажисты женщины ", "city": "Москва"}, {"text": "Мне нравится все, кроме цены) это правда. И специалисты (хотя моя любимая Анна ушла), и атмосфера. Мне просто дороговато. Поэтому я всегда с радостью жду какие-то акции или подарки", "city": "Москва"}, {"text": "Всё прекрасно , мне все нравится!", "city": "Санкт-Петербург"}, {"text": "Мне все нравится ", "city": "Санкт-Петербург"}, {"text": "Рекомендация косметики и возможность приобретения по выгодным ценам ", "city": "Санкт-Петербург"}, {"text": "Пока затрудняюсь ответить, тк мне все очень нравится на данный момент", "city": "Санкт-Петербург"}, {"text": "Мне нравится в одном из салонов возможность приобретать абонемент на 10 и 15 посещений со скидкой в 10 и 15%. ", "city": "Санкт-Петербург"}, {"text": "Более приватное место для массажа, в идеале: отдельный кабинет,но хотя бы наличие ширм между креслами.", "city": "Санкт-Петербург"}, {"text": "Из-за того,что студию стали посещать и мужчины,и женщины,хотелось бы больше приватности,так как иногда не ловко раздеваться прикрываясь полотенцем.", "city": "Санкт-Петербург"}, {"text": "У вас идеальный кабинет на Черемушках. Я бы добавила больше расслабояющей музыки в стиле этника, но ваша тоже прекрасная и ненавязчивая ", "city": "Москва"}, {"text": "Аппаратная косметология + обучение базовым массажным техникам для профилактики проблемных зон дома после посещения Фейсрум", "city": "Санкт-Петербург"}, {"text": "Все нравится. Спасибо за то что вы есть!", "city": "Москва"}, {"text": "Вы прекрасны! Павел просто топ специалист! Польза и удовольствие от посещение практик всегда ", "city": "Санкт-Петербург"}, {"text": "На Попова часто включена громкая и ритмичная музыка, которая не позволяет расслабиться, хотя мне нравится специалист, работающий там. Иногда не иду в этот филиал, потому что понимаю, что не отдохну", "city": "Санкт-Петербург"}, {"text": "Все прекрасно", "city": "Москва"}, {"text": "1)лучше следила бы за мастерством специалистов: я ГОД убирала последствия неаккуратного воздействия вашего «специалиста по телу»!\n2)открыла бы студию ближе к дому\n3)следила бы за «текучкой кадров»\n4)прекратила бы НАСИЛОВАТЬ клиентов (и специалистов) постоянным навязыванием дополнительных услуг/товаров и тд. \n5)очень не люблю неконсистентность: если мне однажды предложили кофе после процедуры - я ожидаю этого каждый раз и меня сильно расстраивает, если я что-то «недополучаю»\nВ целом, «первый состав» был значительно сильнее тех, кто работает сейчас, за исключением разве что нескольких топ-специалистов.", "city": "Санкт-Петербург"}, {"text": "Более внимательный/ приветливый администратор; \nВкусный чай/ напитки с красивой подачей ", "city": "Санкт-Петербург"}, {"text": "Все отлично, спасибо вам большое! ", "city": "Москва"}, {"text": "В салоне на Б.Зеленина массажист не работает каждый день, это не дает возможности посещать его при необходимости(", "city": "Санкт-Петербург"}, {"text": "Очень полюбила Ваш салон - прекрасный сервис и превосходные специалисты и приятная атмосфера. По соим ощущениям не хватает чуть больше тишины и приватности (возможно лёгких перегородок между креслами или растений). Будет ещё приятнее", "city": "Санкт-Петербург"}], "косметология_интересы": [{"text": "Массаж тела/лица, уходовые процедуры за лицом ", "city": "Москва"}, {"text": "Массаж лица и тела", "city": "Москва"}, {"text": "Уход, массажи. Противовозрастное, очищающее", "city": "Санкт-Петербург"}, {"text": "Современная аппаратная малоинвазивная косметология ", "city": "Санкт-Петербург"}, {"text": "Массаж и фэйс-практики", "city": "Санкт-Петербург"}]}, "Санкт-Петербург": {"n": 39, "возраст": {"36–45": 20, "26–35": 9, "46–55": 6, "56+": 3, "18–25": 1}, "роль_ухода": {"Это важно для меня, но не всегда хватает времени": 17, "Это важная часть моего образа жизни": 16, "Уделяю этому внимание время от времени": 6}, "практики": {"Массаж лица": 33, "Домашний уход за лицом и телом": 27, "Регулярная физическая активность": 27, "Массаж тела": 26, "Регулярные медицинские обследования, профилактика здоровья": 21, "СПА, бани или термальные комплексы": 16, "Аппаратная косметология": 12, "Инъекционная косметология": 11, "Медитация, дыхательные практики": 6}, "косметология_практики_n": 16, "что_важно_при_выборе": {"Квалификация специалистов": 31, "Видимый результат": 28, "Атмосфера": 26, "Стоимость": 24, "Удобство расположения": 23, "Удобство записи": 18, "Безопасность и доверие": 17, "Индивидуальный подход": 9, "Рекомендации знакомых": 4}, "поводы_вернуться": {"Появляется желание уделить больше внимания себе": 31, "Вспоминаю о хорошем опыте прошлых посещений": 18, "Получаю предложение или напоминание от FaceRoom": 17, "Появляется выгодное предложение ": 16, "Хочу вернуться к своему специалисту": 14, "Становится удобнее найти время для визита": 6, "Возникает конкретный запрос": 5}, "что_ценно": {"Возможность расслабиться и восстановиться": 28, "Профессионализм специалистов": 22, "Стабильность качества услуг": 19, "Атмосфера и комфорт": 19, "Профилактика возрастных изменений": 18, "Высокий уровень сервиса": 11, "Соотношение цены и качества": 10, "Видимые изменения во внешности": 9, "Индивидуальный подход": 2}, "что_помогло_чаще": {"Более выгодные условия посещения": 32, "Персональный план ухода от специалиста": 9, "Уже посещаю с комфортной частотой": 8, "Поддержка и напоминания между визитами": 5, "Возможность записи в удобное для меня время": 5, "Более прогнозируемый и стабильный результат": 2, "Удобство записи к нужному специалисту": 1}, "интересные_форматы": {"Дополнительные бонусы и привилегии при регулярном посещении": 30, "Короткие экспресс-услуги": 12, "Подписка на регулярный уход за собой": 8, "Косметологические услуги (аппаратная или инъекционная косметология)": 7, "Мероприятия с экспертами и полезными практиками ": 6, "Новые услуги и программы ухода ": 6, "Персональные программы ухода на несколько месяцев ": 6, "Пакеты услуг для решения конкретной задачи ": 5, "Дополнительное сопровождение и рекомендации между визитами ": 1}, "косметология_форматы_n": 7, "свободный": [{"text": "Всё прекрасно , мне все нравится!", "city": "Санкт-Петербург"}, {"text": "Мне все нравится ", "city": "Санкт-Петербург"}, {"text": "Рекомендация косметики и возможность приобретения по выгодным ценам ", "city": "Санкт-Петербург"}, {"text": "Пока затрудняюсь ответить, тк мне все очень нравится на данный момент", "city": "Санкт-Петербург"}, {"text": "Мне нравится в одном из салонов возможность приобретать абонемент на 10 и 15 посещений со скидкой в 10 и 15%. ", "city": "Санкт-Петербург"}, {"text": "Более приватное место для массажа, в идеале: отдельный кабинет,но хотя бы наличие ширм между креслами.", "city": "Санкт-Петербург"}, {"text": "Из-за того,что студию стали посещать и мужчины,и женщины,хотелось бы больше приватности,так как иногда не ловко раздеваться прикрываясь полотенцем.", "city": "Санкт-Петербург"}, {"text": "Аппаратная косметология + обучение базовым массажным техникам для профилактики проблемных зон дома после посещения Фейсрум", "city": "Санкт-Петербург"}, {"text": "Вы прекрасны! Павел просто топ специалист! Польза и удовольствие от посещение практик всегда ", "city": "Санкт-Петербург"}, {"text": "На Попова часто включена громкая и ритмичная музыка, которая не позволяет расслабиться, хотя мне нравится специалист, работающий там. Иногда не иду в этот филиал, потому что понимаю, что не отдохну", "city": "Санкт-Петербург"}, {"text": "1)лучше следила бы за мастерством специалистов: я ГОД убирала последствия неаккуратного воздействия вашего «специалиста по телу»!\n2)открыла бы студию ближе к дому\n3)следила бы за «текучкой кадров»\n4)прекратила бы НАСИЛОВАТЬ клиентов (и специалистов) постоянным навязыванием дополнительных услуг/товаров и тд. \n5)очень не люблю неконсистентность: если мне однажды предложили кофе после процедуры - я ожидаю этого каждый раз и меня сильно расстраивает, если я что-то «недополучаю»\nВ целом, «первый состав» был значительно сильнее тех, кто работает сейчас, за исключением разве что нескольких топ-специалистов.", "city": "Санкт-Петербург"}, {"text": "Более внимательный/ приветливый администратор; \nВкусный чай/ напитки с красивой подачей ", "city": "Санкт-Петербург"}, {"text": "В салоне на Б.Зеленина массажист не работает каждый день, это не дает возможности посещать его при необходимости(", "city": "Санкт-Петербург"}, {"text": "Очень полюбила Ваш салон - прекрасный сервис и превосходные специалисты и приятная атмосфера. По соим ощущениям не хватает чуть больше тишины и приватности (возможно лёгких перегородок между креслами или растений). Будет ещё приятнее", "city": "Санкт-Петербург"}], "косметология_интересы": [{"text": "Уход, массажи. Противовозрастное, очищающее", "city": "Санкт-Петербург"}, {"text": "Современная аппаратная малоинвазивная косметология ", "city": "Санкт-Петербург"}, {"text": "Массаж и фэйс-практики", "city": "Санкт-Петербург"}]}, "Москва": {"n": 12, "возраст": {"26–35": 5, "36–45": 4, "46–55": 2, "56+": 1}, "роль_ухода": {"Это важно для меня, но не всегда хватает времени": 8, "Это важная часть моего образа жизни": 2, "Уделяю этому внимание время от времени": 2}, "практики": {"Массаж лица": 9, "Домашний уход за лицом и телом": 9, "Регулярная физическая активность": 7, "Массаж тела": 6, "Регулярные медицинские обследования, профилактика здоровья": 6, "Аппаратная косметология": 4, "СПА, бани или термальные комплексы": 3, "Медитация, дыхательные практики": 2, "Инъекционная косметология": 1}, "косметология_практики_n": 4, "что_важно_при_выборе": {"Видимый результат": 9, "Атмосфера": 9, "Квалификация специалистов": 7, "Стоимость": 6, "Удобство расположения": 5, "Безопасность и доверие": 5, "Удобство записи": 3, "Индивидуальный подход": 1}, "поводы_вернуться": {"Появляется желание уделить больше внимания себе": 8, "Получаю предложение или напоминание от FaceRoom": 6, "Появляется выгодное предложение ": 6, "Вспоминаю о хорошем опыте прошлых посещений": 5, "Хочу вернуться к своему специалисту": 5, "Становится удобнее найти время для визита": 3, "Возникает конкретный запрос": 1}, "что_ценно": {"Возможность расслабиться и восстановиться": 11, "Профессионализм специалистов": 7, "Атмосфера и комфорт": 6, "Профилактика возрастных изменений": 5, "Стабильность качества услуг": 5, "Соотношение цены и качества": 3, "Видимые изменения во внешности": 3, "Высокий уровень сервиса": 2}, "что_помогло_чаще": {"Более выгодные условия посещения": 8, "Уже посещаю с комфортной частотой": 6, "Более прогнозируемый и стабильный результат": 1, "Поддержка и напоминания между визитами": 1}, "интересные_форматы": {"Дополнительные бонусы и привилегии при регулярном посещении": 7, "Короткие экспресс-услуги": 4, "Подписка на регулярный уход за собой": 3, "Косметологические услуги (аппаратная или инъекционная косметология)": 2, "Персональные программы ухода на несколько месяцев ": 2, "Новые услуги и программы ухода ": 2, "Мероприятия с экспертами и полезными практиками ": 2, "Пакеты услуг для решения конкретной задачи ": 1}, "косметология_форматы_n": 2, "свободный": [{"text": "Просто спасибо вам за ваш салон! Очень люблю)", "city": "Москва"}, {"text": "В части массажа тела интересуют массажисты женщины ", "city": "Москва"}, {"text": "Мне нравится все, кроме цены) это правда. И специалисты (хотя моя любимая Анна ушла), и атмосфера. Мне просто дороговато. Поэтому я всегда с радостью жду какие-то акции или подарки", "city": "Москва"}, {"text": "У вас идеальный кабинет на Черемушках. Я бы добавила больше расслабояющей музыки в стиле этника, но ваша тоже прекрасная и ненавязчивая ", "city": "Москва"}, {"text": "Все нравится. Спасибо за то что вы есть!", "city": "Москва"}, {"text": "Все прекрасно", "city": "Москва"}, {"text": "Все отлично, спасибо вам большое! ", "city": "Москва"}], "косметология_интересы": [{"text": "Массаж тела/лица, уходовые процедуры за лицом ", "city": "Москва"}, {"text": "Массаж лица и тела", "city": "Москва"}]}, "Уфа": {"n": 1, "возраст": {"36–45": 1}, "роль_ухода": {"Это важно для меня, но не всегда хватает времени": 1}, "практики": {"Массаж лица": 1, "Массаж тела": 1, "Аппаратная косметология": 1, "Домашний уход за лицом и телом": 1, "Регулярная физическая активность": 1, "Регулярные медицинские обследования, профилактика здоровья": 1}, "косметология_практики_n": 1, "что_важно_при_выборе": {"Квалификация специалистов": 1, "Безопасность и доверие": 1, "Атмосфера": 1, "Удобство записи": 1, "Индивидуальный подход": 1}, "поводы_вернуться": {"Появляется желание уделить больше внимания себе": 1, "Вспоминаю о хорошем опыте прошлых посещений": 1, "Хочу вернуться к своему специалисту": 1}, "что_ценно": {"Видимые изменения во внешности": 1, "Профилактика возрастных изменений": 1, "Профессионализм специалистов": 1, "Стабильность качества услуг": 1, "Возможность расслабиться и восстановиться": 1, "Атмосфера и комфорт": 1, "Индивидуальный подход": 1}, "что_помогло_чаще": {"Персональный план ухода от специалиста": 1}, "интересные_форматы": {"Персональные программы ухода на несколько месяцев ": 1, "Дополнительные бонусы и привилегии при регулярном посещении": 1, "Пакеты услуг для решения конкретной задачи ": 1, "Дополнительное сопровождение и рекомендации между визитами ": 1}, "косметология_форматы_n": 0, "свободный": [], "косметология_интересы": []}}};
+const FT_ANSWERS = [{"seg": "постоянные", "city": "Санкт-Петербург", "text": "Здравствуйте!\nХотелось бы более камерное пространство во время прохождения процедур, возможно ширму или занавес", "cats": ["privacy"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "Возможность записи онлайн, пока не работает. Возможность покупать совместный депозит, например по одного депозиту/абонементу  ходить с мамой, подругой.", "cats": ["services"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "Мне нечего добавить, очень вас любим всей семьёй", "cats": ["positive"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "У меня выявилась аллергия на косметику фейсрум и теперь нужно докупать опцию для использования другой косметики, это очень неудобно и дорого.", "cats": ["cosmetics", "pricing"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "Было бы здорово, если бы расширилась линейка косметики, которая продается в салонах, появятся новые отличные и качественные бренды ценового сегмента пониже, чем текущие, для альтернативы.", "cats": ["cosmetics", "pricing"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "Чтобы была возможность проводить некоторые процедуры без массажа лица (такие как пилинг и аппаратные, как Елизарова)", "cats": ["services"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "- инъекционная косметология, но только если речь об очень опытных специалистах обязательно с мед образованием и хорошим стажем работы в этой области;\n- большее разнообразие в средствах: желтый пилинг, тыквенный и пр.\n- как доп услуга возможность покрасить брови и ресницы", "cats": ["cosmetics", "services"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "Просить клиентов не разговаривать в полный голос во время массажа", "cats": ["privacy"]}, {"seg": "постоянные", "city": "Москва", "text": "Было бы здорово, если бы во время процедур с лицом можно было бы ухаживать и за кожей рук, например, сделав маску или что-то еще.", "cats": ["services"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "сейчас нет специалиста по лицу, который бы меня полностью устраивал", "cats": ["quality"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "Всё замечательно", "cats": ["positive"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "Отдельные помещения для каждого клиента или какое нибудь разделение между креслами. Т.к. клиенты иногда забывают что не одни и громко разговаривают.", "cats": ["privacy"]}, {"seg": "постоянные", "city": "Уфа", "text": "Так как я пользуюсь услугами через фитмост я бы хотела пробовать и другие процедуры, которых к сожалению нет в расписании (например пилинг лица).", "cats": ["services"]}, {"seg": "постоянные", "city": "Москва", "text": "Локация для меня неудобная, но как на это повлияешь? Вам развития и процветания!!!", "cats": ["location"]}, {"seg": "постоянные", "city": "Уфа", "text": "Для начала поменять локацию и помещение ,больше пространства хочется . Решить вопрос с парковкой ,это вечная проблема", "cats": ["location"]}, {"seg": "постоянные", "city": "Уфа", "text": "Спасибо за качественный сервис", "cats": ["positive"]}, {"seg": "постоянные", "city": "Москва", "text": "Я посещаю faceroom  около 7 лет.\nЭто мой любимый салон. Мне нравятся многие специалисты и даже интересно бывать у разных.\nКонечно цены кусаются, но стараюсь периодически ходить .", "cats": ["positive", "pricing"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "Мне кажется что вы нашли идеальный баланс цена-качество. Я была бы благодарна если бы специалисты показывали мне что я могу сделать с лицом дома сама. Какие точки конкретно мне нужно массировать, чтобы поддержать эффект. У вас прекрасные специалисты, я обожаю Анастасию администратора. Я не сразу нашла своих мастеров, но после поисков я уверена что приду и отдохну. Огромное вам спасибо за ваш труд. Вы сделали отличное место для отдыха для городских занятых женщин. Я очень рада что однажды узнала про вас. \nВ чем можно было бы усилиться? Я помню что в другой сети салонов совершенно потрясающая косметика по аромату и это добавляло расслабления и ощущений. У вас ароматы скорее аскетичные и не запоминающие.", "cats": ["positive", "quality", "cosmetics"]}, {"seg": "постоянные", "city": "Москва", "text": "Затрудняюсь ответить, все нравится!!", "cats": ["positive"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "Побольше акций и клиентских дней!", "cats": ["pricing"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "Мне все нравится, больше люблю отдельные кабинеты, но это не стиль fr", "cats": ["positive", "privacy"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "Сделать двери между залом , где проходят процедуры и входной зоной. Это единственное, что раздражает. Иногда ощущение, что процедуры проходят в прихожей.", "cats": ["privacy"]}, {"seg": "постоянные", "city": "нет в базе", "text": "Затрудняюсь ответить.", "cats": ["positive"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "Абсолютно все устраивает", "cats": ["positive"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "Ширмы между креслами", "cats": ["privacy"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "Все прекрасно. Спасибо большое за заботу!", "cats": ["positive"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "В студиях, которые я посещала, были общие залы для мужчин и женщин с несколькими креслами. Хотелось бы раздельное посещение: если не индивидуальные комнаты, то разные для мужчин и женщин. Некомфортно переодеваться. В некоторых студиях из входной зоны и где производят оплату видно раздевающихся людей. Можно подумать, как это улучшить.", "cats": ["privacy"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "У меня нет нареканий :)", "cats": ["positive"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "Добавить другие практики по уходу на за лицом. \nБолее внимательно отнестись к выбору администратора.", "cats": ["services", "quality"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "Более приватные залы для массажа лица, возможно хотя бы ширмы", "cats": ["privacy"]}, {"seg": "постоянные", "city": "Уфа", "text": "Все хорошо, может быть больше акций и бонусов)", "cats": ["pricing"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "Ширмы между креслами, для ощущения уединения", "cats": ["privacy"]}, {"seg": "постоянные", "city": "Санкт-Петербург", "text": "Консультации по состоянию кожи с рекомендациями не только по спектру услуг/товаров фэйс рум, но советами по средствам домашнего ухода, аппаратной косметологии и т.п. \nЧасы работы в более позднее время до 11 вечера, чтобы после работы можно было успеть на тренировку, а потом на массаж. \nУслуга в 4 руки, когда одновременно делают массаж лица и маникюр.", "cats": ["quality", "services", "location"]}, {"seg": "ушедшие", "city": "Санкт-Петербург", "text": "Вернула бы старые практики", "cats": ["quality", "services"]}, {"seg": "ушедшие", "city": "Уфа", "text": "Расширить ассортимент товаров, добавить хорошую бюджетную линейку.\nПериодически проводить акции интересные, например 3 массажа на все тело по цене 2х.\nПриглашать постоянных клиентов тестировать новые позиции по сниженной цене.", "cats": ["cosmetics", "pricing"]}, {"seg": "ушедшие", "city": "Санкт-Петербург", "text": "Снижение цены", "cats": ["pricing"]}, {"seg": "ушедшие", "city": "Санкт-Петербург", "text": "Больше салонов по городу, была бы рада, если бы появился салон в районе метро Ладожская или Большевиков, тогда я бы могла чаще посещать массаж.", "cats": ["location"]}, {"seg": "ушедшие", "city": "Санкт-Петербург", "text": "Стоимость услуг", "cats": ["pricing"]}, {"seg": "ушедшие", "city": "Санкт-Петербург", "text": "У вас все хорошо", "cats": ["positive"]}, {"seg": "ушедшие", "city": "Санкт-Петербург", "text": "У ВАс все замечательно! Обязательно приду к Вам, как только вернусь из отпуска)", "cats": ["positive"]}, {"seg": "ушедшие", "city": "Санкт-Петербург", "text": "Напоминайте почаще приходить к вам", "cats": ["services"]}, {"seg": "ушедшие", "city": "Санкт-Петербург", "text": "Я очень люблю сеть faceroom особенно на василеостровском и на комендантском.  В последний год я постоянно в разъездах но когда могу - забегаю. \n\nМне нравится именно массаж, а маски и уход я получаю у косметолога. Но в последнее время за тайминг услуги сократилось время массажа и увеличилось время просто уходовой процедуры. \nРазные специалисты по разному проводят процедуру. Кто-то спрашивает в начале \"сделать ли вам маску, какой выбрать уход и тп\", кто то спрашивает в конце перед нанесением маски или какими нибудь шарами, хочу ли я (а я даже не знаю что это, приходится вникнуть, тратится время) кто то вообще не спрашивает. Когда уже расслабился неохота принимать решение.", "cats": ["quality", "services"]}, {"seg": "ушедшие", "city": "Санкт-Петербург", "text": "Чтобы у специалиста была возможность использовать разные способы чистки лица по его усмотрению там , где это необходимо для наилучшего результата.", "cats": ["quality", "services"]}, {"seg": "ушедшие", "city": "Санкт-Петербург", "text": "Больше акций. Например, было 8 марта и многие студии дарили подарки, устраивали розыгрыш, но у вас не было ничего. Хотя направленность сферы ваша именно женская.", "cats": ["pricing"]}, {"seg": "ушедшие", "city": "Москва", "text": "Время работы. И нужная мне процедура карбокси есть только в одном месте.", "cats": ["location", "services"]}, {"seg": "ушедшие", "city": "Санкт-Петербург", "text": "Всё чудесно! Прихожу к вам именно расслабится. Можно добавить какие-нибудь комплексные программы расслабления)\nНапример и массаж и массаж лица и масочка и чаечек. Именно за раз, не запись отдельно.  Просто что бы переключится от всего)", "cats": ["services", "positive"]}, {"seg": "ушедшие", "city": "Санкт-Петербург", "text": "Поменьше разговоров во время массажа. Только по необходимости", "cats": ["privacy"]}, {"seg": "ушедшие", "city": "Москва", "text": "Была бы рада открытию студии в новой Москве, в Троицке:)", "cats": ["location"]}, {"seg": "ушедшие", "city": "Санкт-Петербург", "text": "Больше интересных мероприятий для клиентов", "cats": ["services"]}, {"seg": "возвращенные", "city": "Москва", "text": "Просто спасибо вам за ваш салон! Очень люблю)", "cats": ["positive"]}, {"seg": "возвращенные", "city": "Москва", "text": "В части массажа тела интересуют массажисты женщины", "cats": ["services"]}, {"seg": "возвращенные", "city": "Москва", "text": "Мне нравится все, кроме цены) это правда. И специалисты (хотя моя любимая Анна ушла), и атмосфера. Мне просто дороговато. Поэтому я всегда с радостью жду какие-то акции или подарки", "cats": ["positive", "pricing"]}, {"seg": "возвращенные", "city": "Санкт-Петербург", "text": "Всё прекрасно , мне все нравится!", "cats": ["positive"]}, {"seg": "возвращенные", "city": "Санкт-Петербург", "text": "Мне все нравится", "cats": ["positive"]}, {"seg": "возвращенные", "city": "Санкт-Петербург", "text": "Рекомендация косметики и возможность приобретения по выгодным ценам", "cats": ["cosmetics", "pricing"]}, {"seg": "возвращенные", "city": "Санкт-Петербург", "text": "Пока затрудняюсь ответить, тк мне все очень нравится на данный момент", "cats": ["positive"]}, {"seg": "возвращенные", "city": "Санкт-Петербург", "text": "Мне нравится в одном из салонов возможность приобретать абонемент на 10 и 15 посещений со скидкой в 10 и 15%.", "cats": ["pricing"]}, {"seg": "возвращенные", "city": "Санкт-Петербург", "text": "Более приватное место для массажа, в идеале: отдельный кабинет,но хотя бы наличие ширм между креслами.", "cats": ["privacy"]}, {"seg": "возвращенные", "city": "Санкт-Петербург", "text": "Из-за того,что студию стали посещать и мужчины,и женщины,хотелось бы больше приватности,так как иногда не ловко раздеваться прикрываясь полотенцем.", "cats": ["privacy"]}, {"seg": "возвращенные", "city": "Москва", "text": "У вас идеальный кабинет на Черемушках. Я бы добавила больше расслабояющей музыки в стиле этника, но ваша тоже прекрасная и ненавязчивая", "cats": ["positive", "quality"]}, {"seg": "возвращенные", "city": "Санкт-Петербург", "text": "Аппаратная косметология + обучение базовым массажным техникам для профилактики проблемных зон дома после посещения Фейсрум", "cats": ["cosmetics", "services", "quality"]}, {"seg": "возвращенные", "city": "Москва", "text": "Все нравится. Спасибо за то что вы есть!", "cats": ["positive"]}, {"seg": "возвращенные", "city": "Санкт-Петербург", "text": "Вы прекрасны! Павел просто топ специалист! Польза и удовольствие от посещение практик всегда", "cats": ["positive"]}, {"seg": "возвращенные", "city": "Санкт-Петербург", "text": "На Попова часто включена громкая и ритмичная музыка, которая не позволяет расслабиться, хотя мне нравится специалист, работающий там. Иногда не иду в этот филиал, потому что понимаю, что не отдохну", "cats": ["quality", "privacy"]}, {"seg": "возвращенные", "city": "Москва", "text": "Все прекрасно", "cats": ["positive"]}, {"seg": "возвращенные", "city": "Санкт-Петербург", "text": "1)лучше следила бы за мастерством специалистов: я ГОД убирала последствия неаккуратного воздействия вашего «специалиста по телу»!\n2)открыла бы студию ближе к дому\n3)следила бы за «текучкой кадров»\n4)прекратила бы НАСИЛОВАТЬ клиентов (и специалистов) постоянным навязыванием дополнительных услуг/товаров и тд. \n5)очень не люблю неконсистентность: если мне однажды предложили кофе после процедуры - я ожидаю этого каждый раз и меня сильно расстраивает, если я что-то «недополучаю»\nВ целом, «первый состав» был значительно сильнее тех, кто работает сейчас, за исключением разве что нескольких топ-специалистов.", "cats": ["quality", "services", "location"]}, {"seg": "возвращенные", "city": "Санкт-Петербург", "text": "Более внимательный/ приветливый администратор; \nВкусный чай/ напитки с красивой подачей", "cats": ["quality", "services"]}, {"seg": "возвращенные", "city": "Москва", "text": "Все отлично, спасибо вам большое!", "cats": ["positive"]}, {"seg": "возвращенные", "city": "Санкт-Петербург", "text": "В салоне на Б.Зеленина массажист не работает каждый день, это не дает возможности посещать его при необходимости(", "cats": ["location", "services"]}, {"seg": "возвращенные", "city": "Санкт-Петербург", "text": "Очень полюбила Ваш салон - прекрасный сервис и превосходные специалисты и приятная атмосфера. По соим ощущениям не хватает чуть больше тишины и приватности (возможно лёгких перегородок между креслами или растений). Будет ещё приятнее", "cats": ["positive", "privacy"]}];
+const FT_QUOTES = [{"idx": 1, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "privacy", "text": "Здравствуйте!\nХотелось бы более камерное пространство во время прохождения процедур, возможно ширму или занавес"}, {"idx": 2, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "services", "text": "Возможность записи онлайн, пока не работает. Возможность покупать совместный депозит, например по одного депозиту/абонементу  ходить с мамой, подругой."}, {"idx": 3, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "positive", "text": "Мне нечего добавить, очень вас любим всей семьёй"}, {"idx": 4, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "cosmetics", "text": "У меня выявилась аллергия на косметику фейсрум и теперь нужно докупать опцию для использования другой косметики, это очень неудобно и дорого."}, {"idx": 4, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "pricing", "text": "У меня выявилась аллергия на косметику фейсрум и теперь нужно докупать опцию для использования другой косметики, это очень неудобно и дорого."}, {"idx": 5, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "cosmetics", "text": "Было бы здорово, если бы расширилась линейка косметики, которая продается в салонах, появятся новые отличные и качественные бренды ценового сегмента пониже, чем текущие, для альтернативы."}, {"idx": 5, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "pricing", "text": "Было бы здорово, если бы расширилась линейка косметики, которая продается в салонах, появятся новые отличные и качественные бренды ценового сегмента пониже, чем текущие, для альтернативы."}, {"idx": 6, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "services", "text": "Чтобы была возможность проводить некоторые процедуры без массажа лица (такие как пилинг и аппаратные, как Елизарова)"}, {"idx": 7, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "cosmetics", "text": "Инъекционная косметология (только с опытными специалистами с медицинским образованием); большее разнообразие в средствах: жёлтый пилинг, тыквенный и пр."}, {"idx": 7, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "services", "text": "Возможность покрасить брови и ресницы как дополнительная услуга."}, {"idx": 8, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "privacy", "text": "Просить клиентов не разговаривать в полный голос во время массажа"}, {"idx": 9, "seg": "постоянные", "city": "Москва", "cat": "services", "text": "Было бы здорово, если бы во время процедур с лицом можно было бы ухаживать и за кожей рук, например, сделав маску или что-то еще."}, {"idx": 10, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "quality", "text": "сейчас нет специалиста по лицу, который бы меня полностью устраивал"}, {"idx": 11, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "positive", "text": "Всё замечательно"}, {"idx": 12, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "privacy", "text": "Отдельные помещения для каждого клиента или какое нибудь разделение между креслами. Т.к. клиенты иногда забывают что не одни и громко разговаривают."}, {"idx": 13, "seg": "постоянные", "city": "Уфа", "cat": "services", "text": "Так как я пользуюсь услугами через фитмост я бы хотела пробовать и другие процедуры, которых к сожалению нет в расписании (например пилинг лица)."}, {"idx": 14, "seg": "постоянные", "city": "Москва", "cat": "location", "text": "Локация для меня неудобная, но как на это повлияешь? Вам развития и процветания!!!"}, {"idx": 15, "seg": "постоянные", "city": "Уфа", "cat": "location", "text": "Для начала поменять локацию и помещение ,больше пространства хочется . Решить вопрос с парковкой ,это вечная проблема"}, {"idx": 16, "seg": "постоянные", "city": "Уфа", "cat": "positive", "text": "Спасибо за качественный сервис"}, {"idx": 17, "seg": "постоянные", "city": "Москва", "cat": "positive", "text": "Я посещаю FaceRoom около 7 лет. Это мой любимый салон. Мне нравятся многие специалисты и даже интересно бывать у разных."}, {"idx": 17, "seg": "постоянные", "city": "Москва", "cat": "pricing", "text": "Конечно, цены кусаются, но стараюсь периодически ходить."}, {"idx": 18, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "positive", "text": "Вы сделали отличное место для отдыха для городских занятых женщин. Я обожаю Анастасию-администратора. Огромное спасибо за ваш труд."}, {"idx": 18, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "quality", "text": "Я была бы благодарна, если бы специалисты показывали мне, что я могу делать с лицом дома сама. Какие точки конкретно нужно массировать, чтобы поддержать эффект."}, {"idx": 18, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "cosmetics", "text": "В другой сети салонов — потрясающая косметика по аромату, это добавляло расслабления и ощущений. У вас ароматы скорее аскетичные и не запоминающиеся."}, {"idx": 19, "seg": "постоянные", "city": "Москва", "cat": "positive", "text": "Затрудняюсь ответить, все нравится!!"}, {"idx": 20, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "pricing", "text": "Побольше акций и клиентских дней!"}, {"idx": 21, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "positive", "text": "Мне всё нравится."}, {"idx": 21, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "privacy", "text": "Больше люблю отдельные кабинеты, но это не стиль FaceRoom."}, {"idx": 22, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "privacy", "text": "Сделать двери между залом , где проходят процедуры и входной зоной. Это единственное, что раздражает. Иногда ощущение, что процедуры проходят в прихожей."}, {"idx": 23, "seg": "постоянные", "city": "нет в базе", "cat": "positive", "text": "Затрудняюсь ответить."}, {"idx": 24, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "positive", "text": "Абсолютно все устраивает"}, {"idx": 25, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "privacy", "text": "Ширмы между креслами"}, {"idx": 26, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "positive", "text": "Все прекрасно. Спасибо большое за заботу!"}, {"idx": 27, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "privacy", "text": "В студиях, которые я посещала, были общие залы для мужчин и женщин с несколькими креслами. Хотелось бы раздельное посещение: если не индивидуальные комнаты, то разные для мужчин и женщин. Некомфортно переодеваться. В некоторых студиях из входной зоны и где производят оплату видно раздевающихся людей. Можно подумать, как это улучшить."}, {"idx": 28, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "positive", "text": "У меня нет нареканий :)"}, {"idx": 29, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "services", "text": "Добавить другие практики по уходу за лицом."}, {"idx": 29, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "quality", "text": "Более внимательно отнестись к выбору администратора."}, {"idx": 30, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "privacy", "text": "Более приватные залы для массажа лица, возможно хотя бы ширмы"}, {"idx": 31, "seg": "постоянные", "city": "Уфа", "cat": "pricing", "text": "Все хорошо, может быть больше акций и бонусов)"}, {"idx": 32, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "privacy", "text": "Ширмы между креслами, для ощущения уединения"}, {"idx": 33, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "quality", "text": "Консультации по состоянию кожи — с рекомендациями не только по услугам FaceRoom, но и по домашнему уходу и аппаратной косметологии."}, {"idx": 33, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "services", "text": "Услуга в 4 руки — одновременный массаж лица и маникюр."}, {"idx": 33, "seg": "постоянные", "city": "Санкт-Петербург", "cat": "location", "text": "Часы работы в более позднее время (до 23:00) — чтобы после работы можно было успеть на тренировку, а потом на массаж."}, {"idx": 34, "seg": "ушедшие", "city": "Санкт-Петербург", "cat": "quality", "text": "Вернула бы старые практики"}, {"idx": 34, "seg": "ушедшие", "city": "Санкт-Петербург", "cat": "services", "text": "Вернула бы старые практики"}, {"idx": 35, "seg": "ушедшие", "city": "Уфа", "cat": "cosmetics", "text": "Расширить ассортимент товаров, добавить хорошую бюджетную линейку. Приглашать постоянных клиентов тестировать новые позиции по сниженной цене."}, {"idx": 35, "seg": "ушедшие", "city": "Уфа", "cat": "pricing", "text": "Периодически проводить интересные акции — например, 3 массажа на всё тело по цене 2-х."}, {"idx": 36, "seg": "ушедшие", "city": "Санкт-Петербург", "cat": "pricing", "text": "Снижение цены"}, {"idx": 37, "seg": "ушедшие", "city": "Санкт-Петербург", "cat": "location", "text": "Больше салонов по городу, была бы рада, если бы появился салон в районе метро Ладожская или Большевиков, тогда я бы могла чаще посещать массаж."}, {"idx": 38, "seg": "ушедшие", "city": "Санкт-Петербург", "cat": "pricing", "text": "Стоимость услуг"}, {"idx": 39, "seg": "ушедшие", "city": "Санкт-Петербург", "cat": "positive", "text": "У вас все хорошо"}, {"idx": 40, "seg": "ушедшие", "city": "Санкт-Петербург", "cat": "positive", "text": "У ВАс все замечательно! Обязательно приду к Вам, как только вернусь из отпуска)"}, {"idx": 41, "seg": "ушедшие", "city": "Санкт-Петербург", "cat": "services", "text": "Напоминайте почаще приходить к вам"}, {"idx": 42, "seg": "ушедшие", "city": "Санкт-Петербург", "cat": "quality", "text": "В последнее время сократилось время массажа и увеличилось время уходовой процедуры. Разные специалисты по-разному проводят процедуру — хотелось бы единого стандарта."}, {"idx": 42, "seg": "ушедшие", "city": "Санкт-Петербург", "cat": "services", "text": "Мне нравится именно массаж. Когда уже расслабился — неохота принимать решения по дополнительным услугам в середине процедуры."}, {"idx": 43, "seg": "ушедшие", "city": "Санкт-Петербург", "cat": "quality", "text": "Чтобы у специалиста была возможность использовать разные способы чистки лица по его усмотрению там , где это необходимо для наилучшего результата."}, {"idx": 43, "seg": "ушедшие", "city": "Санкт-Петербург", "cat": "services", "text": "Чтобы у специалиста была возможность использовать разные способы чистки лица по его усмотрению там , где это необходимо для наилучшего результата."}, {"idx": 44, "seg": "ушедшие", "city": "Санкт-Петербург", "cat": "pricing", "text": "Больше акций. Например, было 8 марта и многие студии дарили подарки, устраивали розыгрыш, но у вас не было ничего. Хотя направленность сферы ваша именно женская."}, {"idx": 45, "seg": "ушедшие", "city": "Москва", "cat": "location", "text": "Хотелось бы более удобные часы работы."}, {"idx": 45, "seg": "ушедшие", "city": "Москва", "cat": "services", "text": "Нужная мне процедура (карбокси) есть только в одном месте."}, {"idx": 46, "seg": "ушедшие", "city": "Санкт-Петербург", "cat": "services", "text": "Можно добавить комплексные программы расслабления — массаж тела, массаж лица, масочка и чаёк — за один визит, не записываясь отдельно. Просто чтобы переключиться от всего."}, {"idx": 46, "seg": "ушедшие", "city": "Санкт-Петербург", "cat": "positive", "text": "Всё чудесно! Прихожу к вам именно расслабиться."}, {"idx": 47, "seg": "ушедшие", "city": "Санкт-Петербург", "cat": "privacy", "text": "Поменьше разговоров во время массажа. Только по необходимости"}, {"idx": 48, "seg": "ушедшие", "city": "Москва", "cat": "location", "text": "Была бы рада открытию студии в новой Москве, в Троицке:)"}, {"idx": 49, "seg": "ушедшие", "city": "Санкт-Петербург", "cat": "services", "text": "Больше интересных мероприятий для клиентов"}, {"idx": 50, "seg": "возвращенные", "city": "Москва", "cat": "positive", "text": "Просто спасибо вам за ваш салон! Очень люблю)"}, {"idx": 51, "seg": "возвращенные", "city": "Москва", "cat": "services", "text": "В части массажа тела интересуют массажисты женщины"}, {"idx": 52, "seg": "возвращенные", "city": "Москва", "cat": "positive", "text": "Мне нравится всё! И специалисты (хотя моя любимая Анна ушла), и атмосфера."}, {"idx": 52, "seg": "возвращенные", "city": "Москва", "cat": "pricing", "text": "Мне просто дороговато. Поэтому всегда с радостью жду акции или подарки."}, {"idx": 53, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "positive", "text": "Всё прекрасно , мне все нравится!"}, {"idx": 54, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "positive", "text": "Мне все нравится"}, {"idx": 55, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "cosmetics", "text": "Рекомендация косметики и возможность приобретения по выгодным ценам"}, {"idx": 55, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "pricing", "text": "Рекомендация косметики и возможность приобретения по выгодным ценам"}, {"idx": 56, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "positive", "text": "Пока затрудняюсь ответить, тк мне все очень нравится на данный момент"}, {"idx": 57, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "pricing", "text": "Мне нравится в одном из салонов возможность приобретать абонемент на 10 и 15 посещений со скидкой в 10 и 15%."}, {"idx": 58, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "privacy", "text": "Более приватное место для массажа, в идеале: отдельный кабинет,но хотя бы наличие ширм между креслами."}, {"idx": 59, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "privacy", "text": "Из-за того,что студию стали посещать и мужчины,и женщины,хотелось бы больше приватности,так как иногда не ловко раздеваться прикрываясь полотенцем."}, {"idx": 60, "seg": "возвращенные", "city": "Москва", "cat": "positive", "text": "У вас идеальный кабинет на Черемушках."}, {"idx": 60, "seg": "возвращенные", "city": "Москва", "cat": "quality", "text": "Я бы добавила больше расслабляющей музыки в стиле этника, но ваша тоже прекрасная и ненавязчивая."}, {"idx": 61, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "cosmetics", "text": "Аппаратная косметология как новое направление услуг."}, {"idx": 61, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "services", "text": "Обучение базовым массажным техникам для самостоятельной профилактики проблемных зон дома после посещения FaceRoom."}, {"idx": 61, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "quality", "text": "Обучение базовым массажным техникам для самостоятельной профилактики проблемных зон дома после посещения FaceRoom."}, {"idx": 62, "seg": "возвращенные", "city": "Москва", "cat": "positive", "text": "Все нравится. Спасибо за то что вы есть!"}, {"idx": 63, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "positive", "text": "Вы прекрасны! Павел просто топ специалист! Польза и удовольствие от посещение практик всегда"}, {"idx": 64, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "quality", "text": "На Попова часто включена громкая и ритмичная музыка, которая не позволяет расслабиться, хотя мне нравится специалист, работающий там. Иногда не иду в этот филиал, потому что понимаю, что не отдохну"}, {"idx": 64, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "privacy", "text": "На Попова часто включена громкая и ритмичная музыка, которая не позволяет расслабиться, хотя мне нравится специалист, работающий там. Иногда не иду в этот филиал, потому что понимаю, что не отдохну"}, {"idx": 65, "seg": "возвращенные", "city": "Москва", "cat": "positive", "text": "Все прекрасно"}, {"idx": 66, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "quality", "text": "«Первый состав» был значительно сильнее тех, кто работает сейчас. Следить за мастерством специалистов: клиентка год убирала последствия неаккуратного воздействия «специалиста по телу». Не люблю неконсистентность — если однажды предложили кофе после процедуры, ожидаю этого каждый раз."}, {"idx": 66, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "services", "text": "Прекратить навязывать клиентам и специалистам дополнительные услуги и товары."}, {"idx": 66, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "location", "text": "Открыть студию ближе к дому."}, {"idx": 67, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "quality", "text": "Более внимательный / приветливый администратор."}, {"idx": 67, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "services", "text": "Вкусный чай / напитки с красивой подачей."}, {"idx": 68, "seg": "возвращенные", "city": "Москва", "cat": "positive", "text": "Все отлично, спасибо вам большое!"}, {"idx": 69, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "location", "text": "В салоне на Б.Зеленина массажист не работает каждый день, это не дает возможности посещать его при необходимости("}, {"idx": 69, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "services", "text": "В салоне на Б.Зеленина массажист не работает каждый день, это не дает возможности посещать его при необходимости("}, {"idx": 70, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "positive", "text": "Очень полюбила Ваш салон — прекрасный сервис, превосходные специалисты и приятная атмосфера."}, {"idx": 70, "seg": "возвращенные", "city": "Санкт-Петербург", "cat": "privacy", "text": "Не хватает чуть больше тишины и приватности — возможно лёгких перегородок между креслами или растений."}];
+const FT_CATS = [{"key": "privacy", "label": "Приватность и тишина", "color": "#6366f1", "desc": "Ширмы, отдельные кабинеты, тишина во время процедур"}, {"key": "positive", "label": "Позитивные отзывы", "color": "#2e7d62", "desc": "Благодарности и положительные впечатления"}, {"key": "services", "label": "Новые услуги и форматы", "color": "#1a56db", "desc": "Идеи по расширению услуг, комплексных форматов"}, {"key": "pricing", "label": "Цены и акции", "color": "#b5a06a", "desc": "Запросы на снижение цен, акции, абонементы"}, {"key": "quality", "label": "Специалисты и сервис", "color": "#d97706", "desc": "Качество специалистов, стандарты, атмосфера"}, {"key": "location", "label": "Расположение и доступность", "color": "#64748b", "desc": "Новые локации, парковка, часы работы"}, {"key": "cosmetics", "label": "Косметика и продукты", "color": "#be185d", "desc": "Расширение линейки, домашний уход, ароматы"}];
+const ECON_DATA = {"all": {"post": {"n": 86, "rev": 79985, "freq": 17, "act": 91, "check": 4564}, "ush": {"n": 52, "rev": 23502, "freq": 5, "act": 33, "check": 4573}, "voz": {"n": 52, "rev": 25772, "freq": 6, "act": 42, "check": 4536}}, "Санкт-Петербург": {"post": {"n": 62, "rev": 90023, "freq": 19, "act": 92, "check": 4509}, "ush": {"n": 43, "rev": 19980, "freq": 4, "act": 33, "check": 4477}, "voz": {"n": 39, "rev": 26245, "freq": 6, "act": 42, "check": 4378}}, "Москва": {"post": {"n": 17, "rev": 71465, "freq": 13, "act": 83, "check": 6260}, "ush": {"n": 8, "rev": 28932, "freq": 6, "act": 29, "check": 5078}, "voz": {"n": 12, "rev": 21640, "freq": 4, "act": 38, "check": 4639}}, "Уфа": {"post": {"n": 7, "rev": 53606, "freq": 18, "act": 83, "check": 2821}, "ush": {"n": 1, "rev": 25660, "freq": 4, "act": 25, "check": 6415}, "voz": {"n": 1, "rev": 33488, "freq": 3, "act": 25, "check": 11163}}};
+
+Chart.defaults.set('plugins.datalabels', {display: false});
+
+let city = 'all';
+let ftSeg = 'all';
+let ftCat = 'all';
+const CI = {};
+
+function dd(seg, c) { return RAW[seg][c] || RAW[seg]['all']; }
+function pct(n, t) { return t ? Math.round(n/t*100) : 0; }
+function trunc(s, n) { n = n||38; return s && s.length > n ? s.slice(0,n)+'…' : s; }
+function dest(id) { if(CI[id]){ CI[id].destroy(); delete CI[id]; } }
+
+const CITY_L = {all:'Все города','Санкт-Петербург':'Санкт-Петербург','Москва':'Москва','Уфа':'Уфа'};
+
+function setNote(id, n) {
+  const el = document.getElementById(id);
+  if(el) el.textContent = 'n = ' + n + ' · ' + CITY_L[city];
+}
+
+// ── HORIZONTAL BAR ──────────────────────────────────────────────────────────
+function hbar(id, labels, values, color, total) {
+  dest(id);
+  const ctx = document.getElementById(id); if(!ctx) return;
+  const tot = total || values.reduce((a,b)=>a+b,0);
+  const pcts = values.map(v => pct(v, tot));
+  const maxPct = Math.max(...pcts, 1);
+  CI[id] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels.map(l => trunc(l, 36)),
+      datasets: [{
+        data: pcts,
+        backgroundColor: color + 'cc',
+        borderRadius: 3,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: true,
+      layout: {padding: {right: 8}},
+      plugins: {
+        legend: {display: false},
+        datalabels: {
+          display: true,
+          anchor: 'center',
+          align: 'center',
+          color: '#fff',
+          font: {size: 11, weight: '600'},
+          formatter: function(val, ctx) {
+            if (val < 8) return '';
+            return val + '% (' + values[ctx.dataIndex] + ')';
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(c) {
+              return ' ' + values[c.dataIndex] + ' чел. (' + c.raw + '%)';
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          max: Math.min(Math.ceil(maxPct * 1.4 / 10) * 10, 100),
+          grid: {color: '#f0f0ee'},
+          ticks: {font: {size: 11}, callback: function(v){ return v + '%'; }}
+        },
+        y: {
+          grid: {display: false},
+          ticks: {font: {size: 12}},
+          afterFit: function(ax) { ax.width = Math.max(ax.width, 220); }
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+}
+
+// ── DONUT ───────────────────────────────────────────────────────────────────
+function donut(id, labels, values, colors) {
+  dest(id);
+  const ctx = document.getElementById(id); if(!ctx) return;
+  const total = values.reduce((a,b)=>a+b,0);
+  CI[id] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {labels: labels, datasets: [{data: values, backgroundColor: colors, borderWidth: 2, borderColor: '#fff'}]},
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {position: 'right', labels: {font: {size: 11}, padding: 10, boxWidth: 12}},
+        datalabels: {
+          display: true,
+          color: '#fff',
+          font: {size: 12, weight: 'bold'},
+          formatter: function(v) { return v > 0 ? pct(v, total) + '%' : ''; }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(c) { return ' ' + c.raw + ' чел. (' + pct(c.raw, total) + '%)'; }
+          }
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+}
+
+// ── GROUPED HORIZONTAL BAR ───────────────────────────────────────────────────
+function gbar(id, labels, datasets) {
+  dest(id);
+  const ctx = document.getElementById(id); if(!ctx) return;
+  CI[id] = new Chart(ctx, {
+    type: 'bar',
+    data: {labels: labels.map(l => trunc(l, 30)), datasets: datasets},
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: true,
+      layout: {padding: {right: 40}},
+      plugins: {
+        legend: {labels: {font: {size: 11}, padding: 12, boxWidth: 12}},
+        datalabels: {
+          display: true,
+          anchor: 'end',
+          align: 'end',
+          color: '#666',
+          font: {size: 10},
+          formatter: function(v) { return v > 0 ? v + '%' : ''; }
+        },
+        tooltip: {mode: 'index', intersect: false}
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          grid: {color: '#f0f0ee'},
+          ticks: {font: {size: 11}, callback: function(v){ return v + '%'; }}
+        },
+        y: {
+          grid: {display: false},
+          ticks: {font: {size: 11}},
+          afterFit: function(ax) { ax.width = Math.max(ax.width, 200); }
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+}
+
+// ── RENDER ПОСТОЯННЫЕ ────────────────────────────────────────────────────────
+function renderPost() {
+  const d = dd('постоянные', city); const n = d.n;
+  setNote('post-note', n);
+  const c = document.getElementById('post-charts'); c.innerHTML = '';
+
+  const r1 = document.createElement('div'); r1.className = 'chart-row cols2'; c.appendChild(r1);
+  r1.innerHTML = '<div class="chart-card"><h3>Когда сформировалась привычка возвращаться</h3>' +
+    '<div class="sub">Скорость формирования лояльности</div><canvas id="post-habit" height="180"></canvas></div>' +
+    '<div class="chart-card"><h3>Если любимый специалист уйдёт из FaceRoom</h3>' +
+    '<div class="sub">Лояльность к бренду vs мастеру</div><canvas id="post-spec" height="180"></canvas></div>';
+
+  const r2 = document.createElement('div'); r2.className = 'chart-card'; c.appendChild(r2);
+  r2.innerHTML = '<h3>Что изначально привлекло в FaceRoom</h3>' +
+    '<div class="sub">% от ' + n + ' ответивших, мульти-выбор</div><canvas id="post-att" height="220"></canvas>';
+
+  const r3 = document.createElement('div'); r3.className = 'chart-card'; c.appendChild(r3);
+  r3.innerHTML = '<h3>Что сейчас самое ценное в FaceRoom</h3>' +
+    '<div class="sub">% от ' + n + ' ответивших, мульти-выбор</div><canvas id="post-val" height="220"></canvas>';
+
+  const r4 = document.createElement('div'); r4.className = 'chart-row cols2'; c.appendChild(r4);
+  r4.innerHTML = '<div class="chart-card"><h3>Что помогло бы посещать FaceRoom чаще</h3>' +
+    '<div class="sub">% от ' + n + ' ответивших</div><canvas id="post-freq" height="220"></canvas></div>' +
+    '<div class="chart-card"><h3>Актуально открытие клиники косметологии?</h3>' +
+    '<div class="sub">Прямой вопрос о новом продукте</div><canvas id="post-kl" height="220"></canvas></div>';
+
+  setTimeout(function() {
+    const hab = d['когда_привычка'] || {};
+    const habOrd = [
+      'Практически сразу после первого визита',
+      'В течение первого месяца',
+      'В течение первых 2–3 месяцев',
+      'Постепенно вошло в привычку',
+      'Не могу выделить конкретный момент'
+    ];
+    hbar('post-habit', habOrd, habOrd.map(function(k){return hab[k]||0;}), '#1a56db', n);
+
+    const sp = d['если_спец_уйдет'] || {};
+    donut('post-spec', Object.keys(sp), Object.values(sp), ['#1a56db','#4a85e8','#89b3f0','#c4d9f9','#e8f0fd']);
+
+    const att = d['что_привлекло'] || {};
+    hbar('post-att', Object.keys(att), Object.values(att), '#1a56db', n);
+
+    const val = d['что_ценно'] || {};
+    hbar('post-val', Object.keys(val), Object.values(val), '#2d6fe0', n);
+
+    const fr = d['что_помогло_чаще'] || {};
+    hbar('post-freq', Object.keys(fr), Object.values(fr), '#4a85e8', n);
+
+    const kl = d['косметология_клиника'] || {};
+    donut('post-kl', Object.keys(kl), Object.values(kl), ['#2e7d62','#b5a06a','#c5c5c5','#e8e8e8']);
+  }, 50);
+}
+
+// ── RENDER УШЕДШИЕ ───────────────────────────────────────────────────────────
+function renderUsh() {
+  const d = dd('ушедшие', city); const n = d.n;
+  setNote('ush-note', n);
+  const c = document.getElementById('ush-charts'); c.innerHTML = '';
+
+  function fc(id, title, sub, h) {
+    const div = document.createElement('div'); div.className = 'chart-card'; c.appendChild(div);
+    div.innerHTML = '<h3>' + title + '</h3><div class="sub">' + sub + '</div>' +
+      '<canvas id="' + id + '" height="' + (h||240) + '"></canvas>';
+  }
+  function hr2(items) {
+    const row = document.createElement('div'); row.className = 'chart-row cols2'; c.appendChild(row);
+    items.forEach(function(item) {
+      const div = document.createElement('div'); div.className = 'chart-card'; row.appendChild(div);
+      div.innerHTML = '<h3>' + item[1] + '</h3><div class="sub">' + item[2] + '</div>' +
+        '<canvas id="' + item[0] + '" height="' + (item[3]||220) + '"></canvas>';
+    });
+  }
+
+  fc('ush-reasons', 'Причины снижения частоты посещений', '% от ' + n + ' ответивших, мульти-выбор', 200);
+  hr2([
+    ['ush-sit', 'Текущая ситуация клиента', 'Как они описывают своё положение сейчас', 220],
+    ['ush-where', 'Где получают похожие услуги сейчас', 'Конкурентная среда после оттока', 220]
+  ]);
+  fc('ush-valued', 'Что было ценным в FaceRoom', '% от ' + n + ' ответивших, мульти-выбор', 200);
+  fc('ush-crit', 'Что важно при выборе места ухода сейчас', '% от ' + n + ' ответивших, мульти-выбор', 220);
+
+  setTimeout(function() {
+    const reas = d['причины_оттока'] || {};
+    const rk = Object.keys(reas).filter(function(k){ return !k.includes('повлияло'); });
+    hbar('ush-reasons', rk, rk.map(function(k){return reas[k]||0;}), '#c0392b', n);
+
+    const sit = d['ситуация_сейчас'] || {};
+    donut('ush-sit', Object.keys(sit), Object.values(sit), ['#c0392b','#e07b73','#f0b8b5','#fcd9d7','#fee']);
+
+    const wh = d['где_сейчас'] || {};
+    hbar('ush-where', Object.keys(wh), Object.values(wh), '#8b3030', n);
+
+    const val = d['что_было_ценным'] || {};
+    hbar('ush-valued', Object.keys(val), Object.values(val), '#c0392b', n);
+
+    const crit = d['что_важно_при_выборе'] || {};
+    const ck = Object.keys(crit).filter(function(k){ return !k.includes('уточните'); });
+    hbar('ush-crit', ck, ck.map(function(k){return crit[k]||0;}), '#8b3a3a', n);
+  }, 50);
+}
+
+// ── RENDER ВОЗВРАЩЁННЫЕ ──────────────────────────────────────────────────────
+function renderVoz() {
+  const d = dd('возвращенные', city); const n = d.n;
+  setNote('voz-note', n);
+  const c = document.getElementById('voz-charts'); c.innerHTML = '';
+
+  function fc(id, title, sub, h) {
+    const div = document.createElement('div'); div.className = 'chart-card'; c.appendChild(div);
+    div.innerHTML = '<h3>' + title + '</h3><div class="sub">' + sub + '</div>' +
+      '<canvas id="' + id + '" height="' + (h||240) + '"></canvas>';
+  }
+  function hr2(items) {
+    const row = document.createElement('div'); row.className = 'chart-row cols2'; c.appendChild(row);
+    items.forEach(function(item) {
+      const div = document.createElement('div'); div.className = 'chart-card'; row.appendChild(div);
+      div.innerHTML = '<h3>' + item[1] + '</h3><div class="sub">' + item[2] + '</div>' +
+        '<canvas id="' + item[0] + '" height="' + (item[3]||220) + '"></canvas>';
+    });
+  }
+
+  fc('voz-triggers', 'Что стало поводом снова записаться', '% от ' + n + ' ответивших, мульти-выбор', 220);
+  fc('voz-val', 'Что сейчас самое ценное в FaceRoom', '% от ' + n + ' ответивших, мульти-выбор', 220);
+  hr2([
+    ['voz-freq', 'Что помогло бы посещать чаще', '% от ' + n + ' ответивших', 260],
+    ['voz-fmt', 'Какие форматы были бы интересны', '% от ' + n + ' ответивших, мульти-выбор', 260]
+  ]);
+  fc('voz-crit', 'Что важно при выборе места ухода', '% от ' + n + ' ответивших, мульти-выбор', 220);
+
+  setTimeout(function() {
+    const tr = d['поводы_вернуться'] || {};
+    const tk = Object.keys(tr).filter(function(k){ return !k.includes('уточните') && !k.includes('Что обычно'); });
+    hbar('voz-triggers', tk, tk.map(function(k){return tr[k]||0;}), '#2e7d62', n);
+
+    const val = d['что_ценно'] || {};
+    hbar('voz-val', Object.keys(val), Object.values(val), '#2e7d62', n);
+
+    const fr = d['что_помогло_чаще'] || {};
+    hbar('voz-freq', Object.keys(fr), Object.values(fr), '#1e5e48', n);
+
+    const fmt = d['интересные_форматы'] || {};
+    const fk = Object.keys(fmt).filter(function(k){ return !k.includes('уточните'); });
+    hbar('voz-fmt', fk, fk.map(function(k){return fmt[k]||0;}), '#b5a06a', n);
+
+    const crit = d['что_важно_при_выборе'] || {};
+    const ck = Object.keys(crit).filter(function(k){ return !k.includes('уточните'); });
+    hbar('voz-crit', ck, ck.map(function(k){return crit[k]||0;}), '#2e7d62', n);
+  }, 50);
+}
+
+// ── RENDER СРАВНЕНИЕ ─────────────────────────────────────────────────────────
+function renderCmp() {
+  const pd = dd('постоянные', city), ud = dd('ушедшие', city), vd = dd('возвращенные', city);
+  const C = {post: '#1a56db', ush: '#c0392b', voz: '#2e7d62'};
+
+  // Причины оттока
+  const reas = ud['причины_оттока'] || {};
+  const rk = Object.keys(reas).filter(function(k){ return !k.includes('повлияло'); });
+  hbar('churn-top', rk, rk.map(function(k){return reas[k]||0;}), '#c0392b', ud.n);
+
+  setTimeout(function() {
+    const ages = ['18–25','26–35','36–45','46–55','56+'];
+    gbar('cmp-age', ages, [
+      {label:'Постоянные', data: ages.map(function(k){return pct(pd['возраст']?.[k]||0,pd.n);}), backgroundColor: C.post+'cc'},
+      {label:'Ушедшие',    data: ages.map(function(k){return pct(ud['возраст']?.[k]||0,ud.n);}), backgroundColor: C.ush+'cc'},
+      {label:'Возвращённые', data: ages.map(function(k){return pct(vd['возраст']?.[k]||0,vd.n);}), backgroundColor: C.voz+'cc'}
+    ]);
+
+    const roleMap = [
+      ['Это важная часть моего образа жизни', 'Образ жизни'],
+      ['Это важно для меня, но не всегда хватает времени', 'Важно, не хватает времени'],
+      ['Уделяю этому внимание время от времени', 'Время от времени'],
+      ['Обычно занимаюсь этим только при необходимости', 'Только при необходимости']
+    ];
+    gbar('cmp-role', roleMap.map(function(r){return r[1];}), [
+      {label:'Постоянные', data: roleMap.map(function(r){return pct(pd['роль_ухода']?.[r[0]]||0,pd.n);}), backgroundColor: C.post+'cc'},
+      {label:'Ушедшие',    data: roleMap.map(function(r){return pct(ud['роль_ухода']?.[r[0]]||0,ud.n);}), backgroundColor: C.ush+'cc'},
+      {label:'Возвращённые', data: roleMap.map(function(r){return pct(vd['роль_ухода']?.[r[0]]||0,vd.n);}), backgroundColor: C.voz+'cc'}
+    ]);
+
+    const practs = [
+      'Массаж лица','Домашний уход за лицом и телом','Регулярная физическая активность',
+      'Массаж тела','СПА, бани или термальные комплексы','Аппаратная косметология',
+      'Инъекционная косметология','Медитация, дыхательные практики',
+      'Регулярные медицинские обследования, профилактика здоровья'
+    ];
+    gbar('cmp-pract', practs, [
+      {label:'Постоянные', data: practs.map(function(k){return pct(pd['практики']?.[k]||0,pd.n);}), backgroundColor: C.post+'99'},
+      {label:'Ушедшие',    data: practs.map(function(k){return pct(ud['практики']?.[k]||0,ud.n);}), backgroundColor: C.ush+'99'},
+      {label:'Возвращённые', data: practs.map(function(k){return pct(vd['практики']?.[k]||0,vd.n);}), backgroundColor: C.voz+'99'}
+    ]);
+
+    const valKeys = [
+      'Возможность расслабиться и восстановиться','Атмосфера и комфорт',
+      'Профилактика возрастных изменений','Профессионализм специалистов',
+      'Стабильность качества услуг','Видимые изменения во внешности',
+      'Высокий уровень сервиса','Соотношение цены и качества','Индивидуальный подход'
+    ];
+    gbar('cmp-val', valKeys, [
+      {label:'Постоянные',  data: valKeys.map(function(k){return pct(pd['что_ценно']?.[k]||0,pd.n);}), backgroundColor: C.post},
+      {label:'Возвращённые',data: valKeys.map(function(k){return pct(vd['что_ценно']?.[k]||0,vd.n);}), backgroundColor: C.voz}
+    ]);
+
+    const freqKeys = [
+      'Более выгодные условия посещения','Уже посещаю с комфортной частотой',
+      'Возможность записи в удобное для меня время','Удобство записи к нужному специалисту',
+      'Персональный план ухода от специалиста','Поддержка и напоминания между визитами',
+      'Более прогнозируемый и стабильный результат'
+    ];
+    gbar('cmp-freq', freqKeys, [
+      {label:'Постоянные',  data: freqKeys.map(function(k){return pct(pd['что_помогло_чаще']?.[k]||0,pd.n);}), backgroundColor: C.post},
+      {label:'Возвращённые',data: freqKeys.map(function(k){return pct(vd['что_помогло_чаще']?.[k]||0,vd.n);}), backgroundColor: C.voz}
+    ]);
+  }, 50);
+}
+
+// ── RENDER КОСМЕТОЛОГИЯ ───────────────────────────────────────────────────────
+function renderKos() {
+  const pd = dd('постоянные', city), ud = dd('ушедшие', city), vd = dd('возвращенные', city);
+  document.getElementById('kos-cards').innerHTML =
+    '<div class="kos-card"><h4>Постоянные — интерес к клинике</h4>' +
+      '<div class="kos-pct">' + pct(pd['косметология_потенциал_n']||0, pd.n) + '%</div>' +
+      '<div class="kos-sub">' + (pd['косметология_потенциал_n']||0) + ' из ' + pd.n + ' · «Да» или «Возможно»</div></div>' +
+    '<div class="kos-card"><h4>Постоянные — уже используют косметологию</h4>' +
+      '<div class="kos-pct">' + pct(pd['косметология_практики_n']||0, pd.n) + '%</div>' +
+      '<div class="kos-sub">' + (pd['косметология_практики_n']||0) + ' из ' + pd.n + ' · в практиках ухода</div></div>' +
+    '<div class="kos-card"><h4>Ушедшие — используют косметологию</h4>' +
+      '<div class="kos-pct">' + pct(ud['косметология_практики_n']||0, ud.n) + '%</div>' +
+      '<div class="kos-sub">' + (ud['косметология_практики_n']||0) + ' из ' + ud.n + ' · в практиках ухода</div></div>' +
+    '<div class="kos-card"><h4>Возвращённые — используют косметологию</h4>' +
+      '<div class="kos-pct">' + pct(vd['косметология_практики_n']||0, vd.n) + '%</div>' +
+      '<div class="kos-sub">' + (vd['косметология_практики_n']||0) + ' из ' + vd.n + ' · в практиках ухода</div></div>' +
+    '<div class="kos-card"><h4>Возвращённые — хотят косметологию в форматах</h4>' +
+      '<div class="kos-pct">' + pct(vd['косметология_форматы_n']||0, vd.n) + '%</div>' +
+      '<div class="kos-sub">' + (vd['косметология_форматы_н']||vd['косметология_форматы_n']||0) + ' из ' + vd.n + ' · выбрали в форматах</div></div>';
+
+  setTimeout(function() {
+    const kl = pd['косметология_клиника'] || {};
+    donut('kos-kl', Object.keys(kl), Object.values(kl), ['#2e7d62','#b5a06a','#e0e0e0','#ccc']);
+    hbar('kos-pr',
+      ['Постоянные','Ушедшие','Возвращённые'],
+      [pd['косметология_практики_n']||0, ud['косметология_практики_n']||0, vd['косметология_практики_n']||0],
+      '#b5a06a',
+      Math.max(pd.n, ud.n, vd.n));
+  }, 50);
+
+  const KW = ['аппарат','инъекц','ботокс','биоревит','лимфодрен','капельниц','косметолог',
+    'малоинвазив','мезотерап','пилинг','микротоки','плазмотерап','контурн','филлер','фотоомолож','лазер'];
+  function isKos(t) { var tl = t.toLowerCase(); return KW.some(function(k){ return tl.includes(k); }); }
+
+  var quotes = [];
+  (pd['косметология_интересы']||[]).forEach(function(q){ quotes.push({text:q.text,city:q.city,seg:'Постоянные',cls:'post'}); });
+  (ud['косметология_интересы']||[]).forEach(function(q){ quotes.push({text:q.text,city:q.city,seg:'Ушедшие',cls:'ush'}); });
+  (vd['косметология_интересы']||[]).forEach(function(q){ quotes.push({text:q.text,city:q.city,seg:'Возвращённые',cls:'voz'}); });
+  quotes = quotes.filter(function(q){ return q.text && q.text.trim().length > 3 && isKos(q.text); });
+
+  const kq = document.getElementById('kos-quotes');
+  kq.innerHTML = quotes.length === 0
+    ? '<div class="quotes-empty">Нет релевантных ответов для выбранного города.</div>'
+    : quotes.map(function(q){
+        return '<div class="quote"><p>' + q.text + '</p>' +
+          '<div class="quote-meta"><span class="seg-badge ' + q.cls + '" style="font-size:10px;padding:1px 7px">' + q.seg + '</span> ' + q.city + '</div></div>';
+      }).join('');
+}
+
+// ── FT THEME CHART ───────────────────────────────────────────────────────────
+function renderFtChart() {
+  var pool = FT_ANSWERS.filter(function(a){ return ftSeg === 'all' || a.seg === ftSeg; });
+  var labels = [], counts = [], colors = [];
+  FT_CATS.forEach(function(cat) {
+    var n = pool.filter(function(a){ return a.cats.includes(cat.key); }).length;
+    if (n > 0) { labels.push(cat.label); counts.push(n); colors.push(cat.color); }
+  });
+  donut('ft-chart', labels, counts, colors);
+}
+
+// ── RENDER СВОБОДНЫЕ ОТВЕТЫ ─────────────────────────────────────────────────
+function renderFtCats() {
+  var el = document.getElementById('ft-cats');
+  var pool = FT_ANSWERS.filter(function(a){ return ftSeg === 'all' || a.seg === ftSeg; });
+  var total = pool.length;
+
+  // "Все темы" chip
+  var isAllActive = ftCat === 'all';
+  var html = '<div class="cat-chip' + (isAllActive ? ' active' : '') + '" data-cat="all"' +
+    (isAllActive ? ' style="border-color:#888;border-width:2px"' : '') + '>' +
+    '<div class="cat-dot" style="background:#888"></div>' +
+    '<div class="cat-body"><div class="cat-label">Все темы</div><div class="cat-desc">Все свободные ответы</div></div>' +
+    '<div class="cat-count">' + total + '</div></div>';
+
+  FT_CATS.forEach(function(cat) {
+    var n = pool.filter(function(a){ return a.cats.includes(cat.key); }).length;
+    if (!n) return;
+    var active = ftCat === cat.key;
+    html += '<div class="cat-chip' + (active ? ' active' : '') + '" data-cat="' + cat.key + '"' +
+      (active ? ' style="border-color:' + cat.color + ';border-width:2px"' : '') + '>' +
+      '<div class="cat-dot" style="background:' + cat.color + '"></div>' +
+      '<div class="cat-body">' +
+        '<div class="cat-label">' + cat.label + '</div>' +
+        '<div class="cat-desc">' + cat.desc + '</div>' +
+      '</div>' +
+      '<div class="cat-count" style="color:' + cat.color + '">' + n + ' <span style="font-size:10px;font-weight:400;color:var(--muted)">(' + Math.round(n/total*100) + '%)</span></div>' +
+      '</div>';
+  });
+
+  el.innerHTML = html;
+  el.querySelectorAll('.cat-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      ftCat = chip.dataset.cat;
+      renderFt();
+    });
+  });
+}
+
+function renderFt() {
+  renderFtChart();
+  renderFtCats();
+
+  var SEG_CLS = {постоянные:'post', ушедшие:'ush', возвращенные:'voz'};
+  var SEG_LABEL = {постоянные:'Постоянные', ушедшие:'Ушедшие', возвращенные:'Возвращённые'};
+
+  var answers;
+  if (ftCat === 'all') {
+    // Show full answers (one per respondent)
+    answers = FT_ANSWERS.filter(function(a) {
+      return ftSeg === 'all' || a.seg === ftSeg;
+    });
+  } else {
+    // Show per-category fragments (split for multi-topic answers)
+    answers = FT_QUOTES.filter(function(q) {
+      return q.cat === ftCat && (ftSeg === 'all' || q.seg === ftSeg);
+    });
+  }
+
+  var countEl = document.getElementById('ft-count');
+  var catLabel = ftCat === 'all' ? 'все темы' : FT_CATS.find(function(c){ return c.key === ftCat; }).label.toLowerCase();
+  var segLabel = ftSeg === 'all' ? 'все сегменты' : ftSeg;
+  countEl.textContent = answers.length + ' ' + (ftCat === 'all' ? 'ответов' : 'цитат') + ' · ' + catLabel + ' · ' + segLabel;
+
+  var el = document.getElementById('ft-quotes');
+  el.innerHTML = answers.length === 0
+    ? '<div class="quotes-empty">Нет ответов по выбранным фильтрам.</div>'
+    : answers.map(function(a) {
+        return '<div class="quote"><p>' + a.text + '</p>' +
+          '<div class="quote-meta">' +
+            '<span class="seg-badge ' + SEG_CLS[a.seg] + '" style="font-size:10px;padding:1px 7px">' + SEG_LABEL[a.seg] + '</span> ' +
+            a.city +
+          '</div></div>';
+      }).join('');
+}
+
+// ── ECONOMICS ────────────────────────────────────────────────────────────────
+function fmtRev(n) {
+  var r = Math.round(n / 100) * 100;
+  return r.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+function econCardHtml(cls, label, d) {
+  return '<div class="econ-card ' + cls + '">' +
+    '<div class="econ-seg">' + label + ' · n=' + d.n + '</div>' +
+    '<div class="econ-rev">' + fmtRev(d.rev) + ' <span style="font-size:14px;font-weight:400;color:var(--muted)">руб</span></div>' +
+    '<div class="econ-rev-label">медиана выручки за год</div>' +
+    '<div class="econ-metrics">' +
+      '<div class="econ-metric"><span class="econ-metric-label">Визитов в год</span><span class="econ-metric-val">' + d.freq + '</span></div>' +
+      '<div class="econ-metric"><span class="econ-metric-label">Активных месяцев</span><span class="econ-metric-val">' + d.act + '%</span></div>' +
+      '<div class="econ-metric"><span class="econ-metric-label">Средний чек</span><span class="econ-metric-val">' + fmtRev(d.check) + ' руб</span></div>' +
+    '</div></div>';
+}
+function renderMiniEcon(id, d) {
+  var el = document.getElementById(id); if (!el || !d) return;
+  el.innerHTML =
+    '<div class="mini-econ-item"><div class="mini-econ-val">' + fmtRev(d.rev) + ' руб</div><div class="mini-econ-lbl">медиана выручки за год</div></div>' +
+    '<div class="mini-econ-item"><div class="mini-econ-val">' + d.freq + '</div><div class="mini-econ-lbl">визитов в год</div></div>' +
+    '<div class="mini-econ-item"><div class="mini-econ-val">' + d.act + '%</div><div class="mini-econ-lbl">активных месяцев</div></div>' +
+    '<div class="mini-econ-item"><div class="mini-econ-val">' + fmtRev(d.check) + ' руб</div><div class="mini-econ-lbl">средний чек</div></div>';
+}
+function renderEcon() {
+  var e = ECON_DATA[city] || ECON_DATA['all'];
+  var p = e.post, u = e.ush, v = e.voz;
+  var el = document.getElementById('econ-block'); if (!el || !p || !u) return;
+  var ratio = (p.rev / u.rev).toFixed(1);
+  el.innerHTML =
+    '<div class="econ-banner">' +
+      '<div class="econ-big">' + ratio + '<span>×</span></div>' +
+      '<div class="econ-banner-txt">' +
+        '<h3>Разница в выручке между постоянным и ушедшим клиентом</h3>' +
+        '<p>Средний чек у всех трёх сегментов практически одинаковый. Вся разница создаётся только частотой визитов: постоянный ходит ' + p.freq + ' раз в год, ушедший — ' + u.freq + '. Задача роста — не апсейл дорогих услуг, а увеличение частоты.</p>' +
+      '</div>' +
+    '</div>' +
+    '<div class="econ-row">' +
+      econCardHtml('post', 'Постоянные', p) +
+      econCardHtml('ush', 'Ушедшие', u) +
+      (v ? econCardHtml('voz', 'Возвращённые', v) : '') +
+    '</div>';
+  renderMiniEcon('post-econ', p);
+  renderMiniEcon('ush-econ', u);
+  renderMiniEcon('voz-econ', v);
+}
+
+// ── MULTI-COLOR HBAR ──────────────────────────────────────────────────────────
+function hbarColors(id, labels, values, colors, total) {
+  dest(id);
+  var ctx = document.getElementById(id); if (!ctx) return;
+  var tot = total || values.reduce(function(a,b){return a+b;}, 0);
+  var pcts = values.map(function(v){ return pct(v, tot); });
+  var maxPct = Math.max.apply(null, pcts.concat([1]));
+  CI[id] = new Chart(ctx, {
+    type: 'bar',
+    plugins: [ChartDataLabels],
+    data: {
+      labels: labels.map(function(l){ return trunc(l, 36); }),
+      datasets: [{
+        data: pcts,
+        backgroundColor: colors.map(function(c){ return c + 'cc'; }),
+        borderRadius: 3,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {display: false},
+        datalabels: {
+          display: true, anchor: 'center', align: 'center',
+          color: '#fff', font: {size: 11, weight: '600'},
+          formatter: function(val, ctx) {
+            if (val < 8) return '';
+            return val + '% (' + values[ctx.dataIndex] + ')';
+          }
+        }
+      },
+      scales: {
+        x: {max: Math.min(Math.ceil(maxPct * 1.4 / 10) * 10, 100),
+          grid: {color: '#f0f0ee'}, ticks: {callback: function(v){return v+'%';}, font:{size:11}}},
+        y: {grid: {display: false}, ticks: {font:{size:11}}}
+      },
+      layout: {padding: {right: 8}}
+    }
+  });
+}
+
+// ── TABS ─────────────────────────────────────────────────────────────────────
+let tab = 'overview';
+const renderers = {overview: renderCmp, post: renderPost, ush: renderUsh, voz: renderVoz, kos: renderKos, ft: renderFt};
+
+document.querySelectorAll('.tab').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.tab').forEach(function(b){ b.classList.remove('active'); });
+    document.querySelectorAll('.tab-content').forEach(function(t){ t.classList.remove('active'); });
+    btn.classList.add('active');
+    tab = btn.dataset.tab;
+    document.getElementById('tab-'+tab).classList.add('active');
+    if(renderers[tab]) renderers[tab]();
+  });
+});
+
+document.querySelectorAll('.city-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.city-btn').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    city = btn.dataset.city;
+    // update stat counts
+    ['постоянные','ушедшие','возвращенные'].forEach(function(seg) {
+      const n = dd(seg, city).n;
+      const cls = seg === 'постоянные' ? 'post-n' : seg === 'ушедшие' ? 'ush-n' : 'voz-n';
+      document.querySelectorAll('.'+cls).forEach(function(el){ el.textContent = n; });
+    });
+    renderEcon();
+    if(renderers[tab]) renderers[tab]();
+  });
+});
+
+renderEcon();
+renderCmp();
+
+document.querySelectorAll('.seg-flt').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.seg-flt').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    ftSeg = btn.dataset.seg;
+    renderFt();
+  });
+});
+</script>
+</body>
+</html>
