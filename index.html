@@ -991,6 +991,9 @@ function fmtRev(n) {
   var r = Math.round(n / 100) * 100;
   return r.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 }
+function fmtExact(n) {
+  return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
 function econCardHtml(cls, label, d) {
   return '<div class="econ-card ' + cls + '">' +
     '<div class="econ-seg">' + label + ' · n=' + d.n + '</div>' +
@@ -999,7 +1002,7 @@ function econCardHtml(cls, label, d) {
     '<div class="econ-metrics">' +
       '<div class="econ-metric"><span class="econ-metric-label">Визитов в год</span><span class="econ-metric-val">' + d.freq + '</span></div>' +
       '<div class="econ-metric"><span class="econ-metric-label">Активных месяцев</span><span class="econ-metric-val">' + d.act + '%</span></div>' +
-      '<div class="econ-metric"><span class="econ-metric-label">Средний чек</span><span class="econ-metric-val">' + fmtRev(d.check) + ' руб</span></div>' +
+      '<div class="econ-metric"><span class="econ-metric-label">Средний чек</span><span class="econ-metric-val">' + fmtExact(d.check) + ' руб</span></div>' +
     '</div></div>';
 }
 function renderMiniEcon(id, d) {
@@ -1008,7 +1011,7 @@ function renderMiniEcon(id, d) {
     '<div class="mini-econ-item"><div class="mini-econ-val">' + fmtRev(d.rev) + ' руб</div><div class="mini-econ-lbl">медиана выручки за год</div></div>' +
     '<div class="mini-econ-item"><div class="mini-econ-val">' + d.freq + '</div><div class="mini-econ-lbl">визитов в год</div></div>' +
     '<div class="mini-econ-item"><div class="mini-econ-val">' + d.act + '%</div><div class="mini-econ-lbl">активных месяцев</div></div>' +
-    '<div class="mini-econ-item"><div class="mini-econ-val">' + fmtRev(d.check) + ' руб</div><div class="mini-econ-lbl">средний чек</div></div>';
+    '<div class="mini-econ-item"><div class="mini-econ-val">' + fmtExact(d.check) + ' руб</div><div class="mini-econ-lbl">средний чек</div></div>';
 }
 function renderEcon() {
   var e = ECON_DATA[city] || ECON_DATA['all'];
