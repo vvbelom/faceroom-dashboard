@@ -612,7 +612,16 @@ function gbar(id, labels, datasets, tickSize) {
           font: {size: 10},
           formatter: function(v) { return v > 0 ? v + '%' : ''; }
         },
-        tooltip: {mode: 'index', intersect: false}
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            label: function(c) {
+              var raw = c.dataset.rawData ? c.dataset.rawData[c.dataIndex] : null;
+              return ' ' + c.dataset.label + ': ' + c.raw + '%' + (raw !== null ? ' (' + raw + ')' : '');
+            }
+          }
+        }
       },
       scales: {
         x: {
@@ -790,9 +799,9 @@ function renderCmp() {
   setTimeout(function() {
     const ages = ['18–25','26–35','36–45','46–55','56+'];
     gbar('cmp-age', ages, [
-      {label:'Постоянные', data: ages.map(function(k){return pct(pd['возраст']?.[k]||0,pd.n);}), backgroundColor: C.post+'cc'},
-      {label:'Ушедшие',    data: ages.map(function(k){return pct(ud['возраст']?.[k]||0,ud.n);}), backgroundColor: C.ush+'cc'},
-      {label:'Возвращённые', data: ages.map(function(k){return pct(vd['возраст']?.[k]||0,vd.n);}), backgroundColor: C.voz+'cc'}
+      {label:'Постоянные', data: ages.map(function(k){return pct(pd['возраст']?.[k]||0,pd.n);}), rawData: ages.map(function(k){return pd['возраст']?.[k]||0;}), backgroundColor: C.post+'cc'},
+      {label:'Ушедшие',    data: ages.map(function(k){return pct(ud['возраст']?.[k]||0,ud.n);}), rawData: ages.map(function(k){return ud['возраст']?.[k]||0;}), backgroundColor: C.ush+'cc'},
+      {label:'Возвращённые', data: ages.map(function(k){return pct(vd['возраст']?.[k]||0,vd.n);}), rawData: ages.map(function(k){return vd['возраст']?.[k]||0;}), backgroundColor: C.voz+'cc'}
     ]);
 
     const roleMap = [
@@ -802,9 +811,9 @@ function renderCmp() {
       ['Обычно занимаюсь этим только при необходимости', 'Только при необходимости']
     ];
     gbar('cmp-role', roleMap.map(function(r){return r[1];}), [
-      {label:'Постоянные', data: roleMap.map(function(r){return pct(pd['роль_ухода']?.[r[0]]||0,pd.n);}), backgroundColor: C.post+'cc'},
-      {label:'Ушедшие',    data: roleMap.map(function(r){return pct(ud['роль_ухода']?.[r[0]]||0,ud.n);}), backgroundColor: C.ush+'cc'},
-      {label:'Возвращённые', data: roleMap.map(function(r){return pct(vd['роль_ухода']?.[r[0]]||0,vd.n);}), backgroundColor: C.voz+'cc'}
+      {label:'Постоянные', data: roleMap.map(function(r){return pct(pd['роль_ухода']?.[r[0]]||0,pd.n);}), rawData: roleMap.map(function(r){return pd['роль_ухода']?.[r[0]]||0;}), backgroundColor: C.post+'cc'},
+      {label:'Ушедшие',    data: roleMap.map(function(r){return pct(ud['роль_ухода']?.[r[0]]||0,ud.n);}), rawData: roleMap.map(function(r){return ud['роль_ухода']?.[r[0]]||0;}), backgroundColor: C.ush+'cc'},
+      {label:'Возвращённые', data: roleMap.map(function(r){return pct(vd['роль_ухода']?.[r[0]]||0,vd.n);}), rawData: roleMap.map(function(r){return vd['роль_ухода']?.[r[0]]||0;}), backgroundColor: C.voz+'cc'}
     ]);
 
     const practs = [
@@ -814,9 +823,9 @@ function renderCmp() {
       'Регулярные медицинские обследования, профилактика здоровья'
     ];
     gbar('cmp-pract', practs, [
-      {label:'Постоянные', data: practs.map(function(k){return pct(pd['практики']?.[k]||0,pd.n);}), backgroundColor: C.post+'99'},
-      {label:'Ушедшие',    data: practs.map(function(k){return pct(ud['практики']?.[k]||0,ud.n);}), backgroundColor: C.ush+'99'},
-      {label:'Возвращённые', data: practs.map(function(k){return pct(vd['практики']?.[k]||0,vd.n);}), backgroundColor: C.voz+'99'}
+      {label:'Постоянные', data: practs.map(function(k){return pct(pd['практики']?.[k]||0,pd.n);}), rawData: practs.map(function(k){return pd['практики']?.[k]||0;}), backgroundColor: C.post+'99'},
+      {label:'Ушедшие',    data: practs.map(function(k){return pct(ud['практики']?.[k]||0,ud.n);}), rawData: practs.map(function(k){return ud['практики']?.[k]||0;}), backgroundColor: C.ush+'99'},
+      {label:'Возвращённые', data: practs.map(function(k){return pct(vd['практики']?.[k]||0,vd.n);}), rawData: practs.map(function(k){return vd['практики']?.[k]||0;}), backgroundColor: C.voz+'99'}
     ], 9);
 
   }, 50);
