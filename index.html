@@ -240,14 +240,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       <div class="chart-card"><h3>Возраст клиентов</h3><div class="sub">Распределение по сегментам, %</div><canvas id="cmp-age" height="200"></canvas></div>
       <div class="chart-card"><h3>Роль ухода за собой</h3><div class="sub">Отношение к уходу, %</div><canvas id="cmp-role" height="200"></canvas></div>
     </div>
-    <div class="chart-row cols2">
-      <div class="chart-card"><h3>Топ причин оттока</h3><div class="sub">% ушедших, назвавших эту причину</div><canvas id="churn-top" height="220"></canvas></div>
-      <div class="chart-card"><h3>Практики ухода за собой</h3><div class="sub">% от сегмента</div><canvas id="cmp-pract" height="220"></canvas></div>
-    </div>
-    <div class="chart-row cols2">
-      <div class="chart-card"><h3>Что ценно в FaceRoom сейчас</h3><div class="sub">Постоянные vs Возвращённые, %</div><canvas id="cmp-val" height="260"></canvas></div>
-      <div class="chart-card"><h3>Что помогло бы ходить чаще</h3><div class="sub">Постоянные vs Возвращённые, %</div><canvas id="cmp-freq" height="260"></canvas></div>
-    </div>
+    <div class="chart-card"><h3>Практики ухода за собой</h3><div class="sub">% от сегмента</div><canvas id="cmp-pract" height="220"></canvas></div>
   </div>
 </div>
 
@@ -790,11 +783,6 @@ function renderCmp() {
   const pd = dd('постоянные', city), ud = dd('ушедшие', city), vd = dd('возвращенные', city);
   const C = {post: '#1a56db', ush: '#c0392b', voz: '#2e7d62'};
 
-  // Причины оттока
-  const reas = ud['причины_оттока'] || {};
-  const rk = Object.keys(reas).filter(function(k){ return !k.includes('повлияло'); });
-  hbar('churn-top', rk, rk.map(function(k){return reas[k]||0;}), '#c0392b', ud.n);
-
   setTimeout(function() {
     const ages = ['18–25','26–35','36–45','46–55','56+'];
     gbar('cmp-age', ages, [
@@ -827,27 +815,6 @@ function renderCmp() {
       {label:'Возвращённые', data: practs.map(function(k){return pct(vd['практики']?.[k]||0,vd.n);}), backgroundColor: C.voz+'99'}
     ]);
 
-    const valKeys = [
-      'Возможность расслабиться и восстановиться','Атмосфера и комфорт',
-      'Профилактика возрастных изменений','Профессионализм специалистов',
-      'Стабильность качества услуг','Видимые изменения во внешности',
-      'Высокий уровень сервиса','Соотношение цены и качества','Индивидуальный подход'
-    ];
-    gbar('cmp-val', valKeys, [
-      {label:'Постоянные',  data: valKeys.map(function(k){return pct(pd['что_ценно']?.[k]||0,pd.n);}), backgroundColor: C.post},
-      {label:'Возвращённые',data: valKeys.map(function(k){return pct(vd['что_ценно']?.[k]||0,vd.n);}), backgroundColor: C.voz}
-    ]);
-
-    const freqKeys = [
-      'Более выгодные условия посещения','Уже посещаю с комфортной частотой',
-      'Возможность записи в удобное для меня время','Удобство записи к нужному специалисту',
-      'Персональный план ухода от специалиста','Поддержка и напоминания между визитами',
-      'Более прогнозируемый и стабильный результат'
-    ];
-    gbar('cmp-freq', freqKeys, [
-      {label:'Постоянные',  data: freqKeys.map(function(k){return pct(pd['что_помогло_чаще']?.[k]||0,pd.n);}), backgroundColor: C.post},
-      {label:'Возвращённые',data: freqKeys.map(function(k){return pct(vd['что_помогло_чаще']?.[k]||0,vd.n);}), backgroundColor: C.voz}
-    ]);
   }, 50);
 }
 
