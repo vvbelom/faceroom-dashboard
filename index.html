@@ -519,7 +519,7 @@ function hbar(id, labels, values, color, total) {
   CI[id] = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: labels.map(l => trunc(l, 36)),
+      labels: labels.map(l => trunc(l, 24)),
       datasets: [{
         data: pcts,
         backgroundColor: color + 'cc',
@@ -809,7 +809,7 @@ function renderUsh() {
     var newMax = Math.min(Math.ceil(maxPct * 1.4 / 10) * 10, 100);
     if (CI['ush-reasons']) {
       var ch = CI['ush-reasons'];
-      ch.data.labels = reas.map(function(l){ return trunc(l, 36); });
+      ch.data.labels = reas.map(function(l){ return trunc(l, 24); });
       ch.data.datasets[0].data = pcts;
       ch.options.scales.x.max = newMax;
       ch.options.plugins.datalabels.formatter = function(val, c) {
@@ -1182,7 +1182,7 @@ function hbarColors(id, labels, values, colors, total) {
     type: 'bar',
     plugins: [ChartDataLabels],
     data: {
-      labels: labels.map(function(l){ return trunc(l, 36); }),
+      labels: labels.map(function(l){ return trunc(l, 24); }),
       datasets: [{
         data: pcts,
         backgroundColor: colors.map(function(c){ return c + 'cc'; }),
