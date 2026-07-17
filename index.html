@@ -870,10 +870,12 @@ function renderVoz() {
 
   fc('voz-triggers', 'Что стало поводом снова записаться', '% от ' + n + ' ответивших, мульти-выбор', 220);
   fc('voz-val', 'Что сейчас самое ценное в FaceRoom', '% от ' + n + ' ответивших, мульти-выбор', 220);
-  fc('voz-crit', 'Что важно при выборе места ухода', '% от ' + n + ' ответивших, мульти-выбор', 220);
+  hr2([
+    ['voz-crit', 'Что важно при выборе места ухода', '% от ' + n + ' ответивших, мульти-выбор', 260],
+    ['voz-fmt',  'Какие форматы были бы интересны',  '% от ' + n + ' ответивших, мульти-выбор', 260]
+  ]);
 
-  var vfRow = document.createElement('div'); vfRow.className = 'chart-row cols2'; c.appendChild(vfRow);
-  var vfCard = document.createElement('div'); vfCard.className = 'chart-card'; vfRow.appendChild(vfCard);
+  var vfCard = document.createElement('div'); vfCard.className = 'chart-card'; c.appendChild(vfCard);
   vfCard.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">' +
     '<h3 style="margin:0">Что помогло бы посещать чаще</h3>' +
     '<div class="rtgl-wrap">' +
@@ -881,11 +883,7 @@ function renderVoz() {
     '<button class="rtgl vf-btn" id="vf-sub">Не хватает времени</button>' +
     '</div></div>' +
     '<div class="sub" id="voz-freq-sub">% от ' + n + ' ответивших</div>' +
-    '<canvas id="voz-freq" height="260"></canvas>';
-  var vfCard2 = document.createElement('div'); vfCard2.className = 'chart-card'; vfRow.appendChild(vfCard2);
-  vfCard2.innerHTML = '<h3>Какие форматы были бы интересны</h3>' +
-    '<div class="sub">% от ' + n + ' ответивших, мульти-выбор</div>' +
-    '<canvas id="voz-fmt" height="260"></canvas>';
+    '<canvas id="voz-freq" height="200"></canvas>';
 
   var _vozFreqRaw = [];
   function showVozFreq(mode) {
@@ -938,13 +936,13 @@ function renderVoz() {
     const ck = Object.keys(crit).filter(function(k){ return !k.includes('уточните'); });
     hbar('voz-crit', ck, ck.map(function(k){return crit[k]||0;}), '#2e7d62', n);
 
-    showVozFreq('all');
-    document.getElementById('vf-all').onclick = function(){ showVozFreq('all'); };
-    document.getElementById('vf-sub').onclick = function(){ showVozFreq('sub'); };
-
     const fmt = d['интересные_форматы'] || {};
     const fk = Object.keys(fmt).filter(function(k){ return !k.includes('уточните'); });
     hbar('voz-fmt', fk, fk.map(function(k){return fmt[k]||0;}), '#b5a06a', n);
+
+    showVozFreq('all');
+    document.getElementById('vf-all').onclick = function(){ showVozFreq('all'); };
+    document.getElementById('vf-sub').onclick = function(){ showVozFreq('sub'); };
   }, 50);
 }
 
