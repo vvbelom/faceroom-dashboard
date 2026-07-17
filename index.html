@@ -739,6 +739,8 @@ function renderUsh() {
 
   var _ushN = n;
   function showUshReasons(mode) {
+    var cvs = document.getElementById('ush-reasons');
+    if (cvs) { cvs.removeAttribute('style'); cvs.setAttribute('height', '200'); }
     var reas, total, sub;
     if (mode === 'comp') {
       var cr = USH_COMP.reasons || {};
