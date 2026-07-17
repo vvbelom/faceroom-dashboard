@@ -107,6 +107,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 .seg-flt{padding:5px 14px;border-radius:20px;border:1px solid var(--border);
   background:#fff;cursor:pointer;font-size:12px;transition:all .15s}
 .seg-flt.active{background:var(--text);color:#fff;border-color:var(--text)}
+/* REASONS TOGGLE */
+.rtgl-wrap{display:flex;gap:4px}
+.rtgl{padding:3px 12px;border-radius:16px;border:1px solid var(--border);
+  font-size:12px;cursor:pointer;background:#fff;transition:all .15s}
+.rtgl.active{background:var(--ush);color:#fff;border-color:var(--ush)}
 /* CATEGORY CHIPS */
 .cat-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
 .cat-chip{display:flex;align-items:center;gap:10px;padding:10px 14px;
@@ -713,32 +718,59 @@ function renderUsh() {
     });
   }
 
-  fc('ush-reasons', 'Причины снижения частоты посещений', '% от ' + n + ' ответивших, мульти-выбор', 200);
+  var reasonsCard = document.createElement('div'); reasonsCard.className = 'chart-card'; c.appendChild(reasonsCard);
+  reasonsCard.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">' +
+      '<h3>Причины снижения частоты посещений</h3>' +
+      '<div class="rtgl-wrap">' +
+        '<button class="rtgl active" id="rtgl-all">Все</button>' +
+        '<button class="rtgl" id="rtgl-comp">У конкурентов</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="sub" id="ush-reasons-sub">% от ' + n + ' ответивших, мульти-выбор</div>' +
+    '<canvas id="ush-reasons" height="200"></canvas>';
   hr2([
     ['ush-sit', 'Текущая ситуация клиента', 'Как они описывают своё положение сейчас', 220],
     ['ush-where', 'Где получают похожие услуги сейчас', 'Конкурентная среда после оттока', 220]
   ]);
-  const compCard = document.createElement('div'); compCard.className = 'chart-card'; c.appendChild(compCard);
-  compCard.innerHTML = '<h3>Причины ухода — те, кто сейчас у конкурентов</h3>' +
-    '<div class="sub">% от ' + USH_COMP.n + ' человек, перешедших в другую студию, салон или к частному специалисту</div>' +
-    '<canvas id="ush-comp-reasons" height="200"></canvas>';
   fc('ush-valued', 'Что было ценным в FaceRoom', '% от ' + n + ' ответивших, мульти-выбор', 200);
   fc('ush-crit', 'Что важно при выборе места ухода сейчас', '% от ' + n + ' ответивших, мульти-выбор', 220);
 
+  var _ushN = n;
+  function showUshReasons(mode) {
+    var reas, total, sub;
+    if (mode === 'comp') {
+      var cr = USH_COMP.reasons || {};
+      reas = Object.keys(cr).sort(function(a,b){ return (cr[b]||0)-(cr[a]||0); });
+      total = USH_COMP.n;
+      sub = '% от ' + USH_COMP.n + ' человек у конкурентов (другая студия, салон, частный специалист)';
+    } else {
+      var dd_ush = dd('ушедшие', city);
+      var all = dd_ush['причины_оттока'] || {};
+      reas = Object.keys(all).filter(function(k){ return !k.includes('повлияло'); });
+      total = _ushN;
+      sub = '% от ' + _ushN + ' ответивших, мульти-выбор';
+    }
+    document.getElementById('ush-reasons-sub').textContent = sub;
+    var vals = mode === 'comp'
+      ? reas.map(function(k){ return (USH_COMP.reasons||{})[k]||0; })
+      : reas.map(function(k){ var r=(dd('ушедшие',city)['причины_оттока']||{}); return r[k]||0; });
+    hbar('ush-reasons', reas, vals, '#c0392b', total);
+    document.querySelectorAll('.rtgl').forEach(function(b){ b.classList.remove('active'); });
+    document.getElementById('rtgl-' + mode).classList.add('active');
+  }
+
   setTimeout(function() {
-    const reas = d['причины_оттока'] || {};
-    const rk = Object.keys(reas).filter(function(k){ return !k.includes('повлияло'); });
-    hbar('ush-reasons', rk, rk.map(function(k){return reas[k]||0;}), '#c0392b', n);
+    showUshReasons('all');
+
+    document.getElementById('rtgl-all').onclick = function(){ showUshReasons('all'); };
+    document.getElementById('rtgl-comp').onclick = function(){ showUshReasons('comp'); };
 
     const sit = d['ситуация_сейчас'] || {};
     donut('ush-sit', Object.keys(sit), Object.values(sit), ['#c0392b','#e07b73','#f0b8b5','#fcd9d7','#fee']);
 
     const wh = d['где_сейчас'] || {};
     hbar('ush-where', Object.keys(wh), Object.values(wh), '#8b3030', n);
-
-    const cr = USH_COMP.reasons || {};
-    const crk = Object.keys(cr).sort(function(a,b){ return (cr[b]||0)-(cr[a]||0); });
-    hbar('ush-comp-reasons', crk, crk.map(function(k){return cr[k]||0;}), '#8b1a1a', USH_COMP.n);
 
     const val = d['что_было_ценным'] || {};
     hbar('ush-valued', Object.keys(val), Object.values(val), '#c0392b', n);
