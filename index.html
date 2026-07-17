@@ -737,9 +737,8 @@ function renderUsh() {
   fc('ush-crit', 'Что важно при выборе места ухода сейчас', '% от ' + n + ' ответивших, мульти-выбор', 220);
 
   var _ushN = n;
+  var _ushReasonsRaw = [];
   function showUshReasons(mode) {
-    var cvs = document.getElementById('ush-reasons');
-    if (cvs) { cvs.removeAttribute('style'); cvs.setAttribute('height', '200'); }
     var reas, total, sub;
     if (mode === 'comp') {
       var cr = USH_COMP.reasons || {};
@@ -747,17 +746,35 @@ function renderUsh() {
       total = USH_COMP.n;
       sub = '% от ' + USH_COMP.n + ' человек у конкурентов (другая студия, салон, частный специалист)';
     } else {
-      var dd_ush = dd('ушедшие', city);
-      var all = dd_ush['причины_оттока'] || {};
-      reas = Object.keys(all).filter(function(k){ return !k.includes('повлияло'); });
+      var allR = dd('ушедшие', city)['причины_оттока'] || {};
+      reas = Object.keys(allR).filter(function(k){ return !k.includes('повлияло'); });
       total = _ushN;
       sub = '% от ' + _ushN + ' ответивших, мульти-выбор';
     }
     document.getElementById('ush-reasons-sub').textContent = sub;
     var vals = mode === 'comp'
       ? reas.map(function(k){ return (USH_COMP.reasons||{})[k]||0; })
-      : reas.map(function(k){ var r=(dd('ушедшие',city)['причины_оттока']||{}); return r[k]||0; });
-    hbar('ush-reasons', reas, vals, '#c0392b', total);
+      : reas.map(function(k){ return (dd('ушедшие',city)['причины_оттока']||{})[k]||0; });
+    _ushReasonsRaw = vals;
+    var pcts = vals.map(function(v){ return pct(v, total); });
+    var maxPct = Math.max.apply(null, pcts.concat([1]));
+    var newMax = Math.min(Math.ceil(maxPct * 1.4 / 10) * 10, 100);
+    if (CI['ush-reasons']) {
+      var ch = CI['ush-reasons'];
+      ch.data.labels = reas.map(function(l){ return trunc(l, 36); });
+      ch.data.datasets[0].data = pcts;
+      ch.options.scales.x.max = newMax;
+      ch.options.plugins.datalabels.formatter = function(val, c) {
+        if (val < 8) return '';
+        return val + '% (' + _ushReasonsRaw[c.dataIndex] + ')';
+      };
+      ch.options.plugins.tooltip.callbacks.label = function(c) {
+        return ' ' + _ushReasonsRaw[c.dataIndex] + ' чел. (' + c.raw + '%)';
+      };
+      ch.update();
+    } else {
+      hbar('ush-reasons', reas, vals, '#c0392b', total);
+    }
     document.querySelectorAll('.rtgl').forEach(function(b){ b.classList.remove('active'); });
     document.getElementById('rtgl-' + mode).classList.add('active');
   }
