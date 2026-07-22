@@ -48,7 +48,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 /* INSIGHT GRID */
 .ins-flow{display:flex;align-items:stretch;gap:0;margin-bottom:12px}
 .ins-flow .ins{flex:1}
-.ins-arrow{display:flex;align-items:center;padding:0 14px;font-size:22px;color:var(--muted);flex-shrink:0}
+.ins-arrow{width:2px;background:#e8a0b0;flex-shrink:0;align-self:stretch;margin:0 14px;border-radius:1px}
 .ins-solo{margin-bottom:12px}
 .ins-solo .ins{max-width:608px}
 .insights{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
@@ -275,12 +275,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 <div class="tab-content" id="tab-conclusions">
   <p style="font-size:13px;color:#555;line-height:1.6;margin-bottom:20px;max-width:680px">Сводные данные по трём сегментам — постоянным, ушедшим и возвращённым клиентам. Каждый инсайт даёт конкретный ответ на вопросы исследования: механики лояльности, причины оттока и драйверы возврата.</p>
   <div class="section-title">Ключевые инсайты исследования</div>
-  <div class="ins-flow">
+  <div class="ins-flow" style="margin-bottom:28px">
     <div class="ins">
       <h3>Решение остаться — за первый месяц</h3>
       <p><b class="cn-post">71%</b> постоянных захотели вернуться сразу после первого визита. Ещё <b class="cn-post">11%</b> — в течение первого месяца. Первый месяц — критическое окно для формирования привычки.</p>
     </div>
-    <div class="ins-arrow">→</div>
+    <div class="ins-arrow"></div>
     <div class="ins ins-action">
       <div class="ins-action-badge">ФОКУС</div>
       <h3>Рост доли возвратов в первый месяц</h3>
@@ -288,7 +288,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     </div>
   </div>
 
-  <div class="ins-flow" style="margin-bottom:12px;gap:12px">
+  <div class="ins-flow" style="margin-bottom:0;gap:12px">
     <div class="ins" style="max-width:none;flex:1">
       <h3>Главные ценности — восстановление, расслабление, атмосфера</h3>
       <p><b class="cn-post">79%</b> постоянных выбирают расслабление как главную ценность, атмосферу и комфорт — <b class="cn-post">53%</b>. Для <b class="cn-ush">69%</b> ушедших наиболее ценной была возможность расслабиться, <b class="cn-ush">48%</b> отметили атмосферу. У возвращённых <b class="cn-voz">77%</b> назвали восстановление ключевой ценностью, <b class="cn-voz">50%</b> — атмосферу и комфорт. С регулярностью визитов ценность смещается с косметического результата к эмоциональной составляющей и велнесс-контексту.</p>
@@ -302,23 +302,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       <p>Специалисты — топ критерий при привлечении: отмечают <b class="cn-post">57%</b> постоянных, <b class="cn-ush">73%</b> ушедших, <b class="cn-voz">75%</b> возвращённых. Однако при удержании ценность смещается в сторону велнесс и бренда: <b class="cn-post">77%</b> постоянных останутся в FaceRoom, если уйдёт любимый специалист.</p>
     </div>
   </div>
-  <div style="display:flex;margin-bottom:4px">
+  <div style="display:flex;margin-bottom:4px;margin-top:6px">
     <div style="flex:1;text-align:center;font-size:16px;color:var(--muted)">↓</div>
     <div style="flex:1;text-align:center;font-size:16px;color:var(--muted)">↓</div>
     <div style="flex:1;text-align:center;font-size:16px;color:var(--muted)">↓</div>
   </div>
-  <div class="ins ins-action" style="margin-bottom:12px">
+  <div class="ins ins-action" style="margin-bottom:28px">
     <div class="ins-action-badge">ФОКУС</div>
     <h3>Посыл в коммуникациях</h3>
     <p>Постоянным близок язык велнесса и ритуала заботы о себе — это уже их образ жизни. Возвращать клиентов помогают эмоциональные отсылки к хорошему опыту и времени для себя + конкретный повод: напоминание или выгодное предложение. В выборе места для ухода за собой работает акцент на квалификации специалистов — применимо для новых клиентов.</p>
   </div>
 
-  <div class="ins-flow" style="margin-bottom:12px">
+  <div class="ins-flow" style="margin-bottom:28px">
     <div class="ins">
       <h3>Стоимость — сквозной барьер</h3>
       <p><b class="cn-post">71%</b> постоянных и <b class="cn-voz">77%</b> возвращённых хотят более выгодных условий посещения. <b class="cn-ush">46%</b> ушедших назвали финансовые приоритеты причиной оттока №1. <b class="cn-voz">73%</b> возвращённых хотят бонусы и привилегии при регулярных посещениях — самый популярный формат из всех. Запрос на программу лояльности универсален.</p>
     </div>
-    <div class="ins-arrow">→</div>
+    <div class="ins-arrow"></div>
     <div class="ins ins-action">
       <div class="ins-action-badge">ФОКУС</div>
       <h3>Программа лояльности</h3>
@@ -326,21 +326,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     </div>
   </div>
 
-  <div class="ins-flow" style="gap:12px;margin-bottom:12px">
-    <div class="ins">
-      <h3>Среда ушедших</h3>
-      <p><b class="cn-ush">42%</b> ушедших получают похожие услуги у конкурентов, <b class="cn-ush">58%</b> на паузе или делают уход дома — наиболее доступны для реактивации.</p></div>
-    <div class="ins">
-      <h3>Ушедшие моложе</h3>
-      <p>В сегменте ушедших <b class="cn-ush">41%</b> составляют клиенты 18–35 лет против <b class="cn-post">20%</b> у постоянных. Эта аудитория более финансово чувствительна, её удержание требует отдельных механик (лояльность + предлагаемые ценности).</p></div>
-  </div>
-  <div style="display:flex;gap:12px;margin-bottom:12px">
+  <div style="display:flex;gap:12px;margin-bottom:28px">
     <div class="ins-flow" style="flex:1;margin-bottom:0">
       <div class="ins">
         <h3>Внешняя структура для возвращённых</h3>
         <p>Возвращённые ищут помощь в организации визитов. Персональный план — <b class="cn-voz">19%</b> возвращённых vs <b class="cn-post">10%</b> постоянных. В подгруппах «не хватает времени» разрыв ещё больше: <b class="cn-voz">23%</b> vs <b class="cn-post">8%</b>. Поддержка и напоминания: <b class="cn-voz">12%</b> возвращённых vs <b class="cn-post">3%</b> постоянных.</p>
       </div>
-      <div class="ins-arrow">→</div>
+      <div class="ins-arrow"></div>
       <div class="ins ins-action">
         <div class="ins-action-badge">ФОКУС</div>
         <h3>Внешняя структура</h3>
@@ -354,7 +346,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
         <h3>Доступность</h3>
         <p>Доступность записи к конкретному специалисту важнее для постоянных, однако доступность времени одинаково важна для двух сегментов. Время: <b class="cn-post">12%</b> постоянных vs <b class="cn-voz">10%</b> возвращённых. Специалист: <b class="cn-post">11%</b> постоянных vs <b class="cn-voz">2%</b> возвращённых.</p>
       </div>
-      <div class="ins-arrow">→</div>
+      <div class="ins-arrow"></div>
       <div class="ins ins-action">
         <div class="ins-action-badge">ФОКУС</div>
         <h3>Доступность</h3>
@@ -362,6 +354,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
         <p>Можно провести эксперимент: после формирования графика — рассылка с приглашением запланировать визиты на следующий месяц в приоритетном порядке. В части студий постоянным, в другой — возвращённым, сравнить результаты.</p>
       </div>
     </div>
+  </div>
+
+  <div class="ins-flow" style="gap:12px;margin-bottom:12px">
+    <div class="ins">
+      <h3>Среда ушедших</h3>
+      <p><b class="cn-ush">42%</b> ушедших получают похожие услуги у конкурентов, <b class="cn-ush">58%</b> на паузе или делают уход дома — наиболее доступны для реактивации.</p></div>
+    <div class="ins">
+      <h3>Ушедшие моложе</h3>
+      <p>В сегменте ушедших <b class="cn-ush">41%</b> составляют клиенты 18–35 лет против <b class="cn-post">20%</b> у постоянных. Эта аудитория более финансово чувствительна, её удержание требует отдельных механик (лояльность + предлагаемые ценности).</p></div>
   </div>
   </div>
 </div>
