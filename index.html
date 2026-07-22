@@ -1184,13 +1184,12 @@ function renderKos() {
   if (quotes.length === 0) {
     kq.innerHTML = '<div class="quotes-empty">Нет релевантных ответов для выбранного города.</div>';
   } else {
-    kq.innerHTML = '<p style="font-size:12px;color:var(--muted);margin-bottom:14px">Всего упомянули косметологию: ' + quotes.length + ' человек</p>' +
-      '<div style="display:flex;flex-wrap:wrap;gap:10px">' +
-      catCounts.map(function(cat){
-        return '<div style="display:flex;align-items:center;gap:12px;padding:10px 20px;border:1px solid var(--border);border-radius:var(--r);background:var(--card)">' +
-          '<span style="font-size:22px;font-weight:700;color:var(--acc)">' + cat.n + '</span>' +
-          '<span style="font-size:13px;color:var(--text)">' + cat.label + '</span></div>';
-      }).join('') + '</div>';
+    var total = quotes.length;
+    var rows = catCounts.map(function(cat){
+      var p = Math.round(cat.n / total * 100);
+      return '<p style="margin:0 0 10px 0;font-size:13px;color:var(--text);line-height:1.6"><b>' + cat.label + '</b> — ' + cat.n + ' из ' + total + ' (' + p + '%).</p>';
+    }).join('');
+    kq.innerHTML = '<p style="font-size:13px;color:var(--text);line-height:1.6;margin:0 0 14px 0">Всего упомянули косметологию: <b>' + total + ' человек</b>.</p>' + rows;
   }
 }
 
