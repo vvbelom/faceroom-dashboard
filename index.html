@@ -431,19 +431,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 <div class="tab-content" id="tab-kos">
   <div class="section-title">Потенциал аудитории для клиники косметологии</div>
   <div class="kos-row" id="kos-cards"></div>
-  <div class="analysis">
-    <h3>Выводы</h3>
-    <div class="ai-items">
-      <div class="ai"><div class="ai-num post">76%</div>
-        <div class="ai-txt"><strong>Большинство постоянных открыты к косметологии.</strong> 76% ответили «Да» или «Возможно» на вопрос об открытии клиники. Это значимый потенциальный спрос — особенно с учётом доверия к бренду и привычки к регулярным визитам.</div></div>
-      <div class="ai"><div class="ai-num voz">40%</div>
-        <div class="ai-txt"><strong>Возвращённые — неожиданно самый «косметологический» сегмент.</strong> 40% уже используют аппаратную или инъекционную косметологию — втрое больше чем постоянные (15%). Этот сегмент имеет сложившийся потребительский паттерн и скорее всего сравнивает предложения на рынке.</div></div>
-      <div class="ai"><div class="ai-num ush">21%</div>
-        <div class="ai-txt"><strong>Часть ушедших уже у косметологов.</strong> 21% ушедших используют аппаратную или инъекционную косметологию. Открытие клиники создаёт дополнительный повод для реактивации этой аудитории через новый продукт.</div></div>
-      <div class="ai"><div class="ai-num acc">17%</div>
-        <div class="ai-txt"><strong>Запрос на косметологию в форматах — пока нишевый.</strong> Только 17% возвращённых выбрали косметологию как желанный формат. Открытие клиники требует отдельного позиционирования без расчёта на автоматический переток текущей базы.</div></div>
-    </div>
-  </div>
   <div class="charts">
     <div class="chart-row cols2">
       <div class="chart-card"><h3>Постоянные: актуально открытие клиники?</h3><div class="sub">Прямой вопрос о новом продукте</div><canvas id="kos-kl" height="200"></canvas></div>
@@ -991,19 +978,19 @@ function renderKos() {
   const pd = dd('постоянные', city), ud = dd('ушедшие', city), vd = dd('возвращенные', city);
   document.getElementById('kos-cards').innerHTML =
     '<div class="kos-card"><h4>Постоянные — интерес к клинике</h4>' +
-      '<div class="kos-pct">' + pct(pd['косметология_потенциал_n']||0, pd.n) + '%</div>' +
+      '<div class="kos-pct" style="color:var(--post)">' + pct(pd['косметология_потенциал_n']||0, pd.n) + '%</div>' +
       '<div class="kos-sub">' + (pd['косметология_потенциал_n']||0) + ' из ' + pd.n + ' · «Да» или «Возможно»</div></div>' +
     '<div class="kos-card"><h4>Постоянные — уже используют косметологию</h4>' +
-      '<div class="kos-pct">' + pct(pd['косметология_практики_n']||0, pd.n) + '%</div>' +
+      '<div class="kos-pct" style="color:var(--post)">' + pct(pd['косметология_практики_n']||0, pd.n) + '%</div>' +
       '<div class="kos-sub">' + (pd['косметология_практики_n']||0) + ' из ' + pd.n + ' · в практиках ухода</div></div>' +
     '<div class="kos-card"><h4>Ушедшие — используют косметологию</h4>' +
-      '<div class="kos-pct">' + pct(ud['косметология_практики_n']||0, ud.n) + '%</div>' +
+      '<div class="kos-pct" style="color:var(--ush)">' + pct(ud['косметология_практики_n']||0, ud.n) + '%</div>' +
       '<div class="kos-sub">' + (ud['косметология_практики_n']||0) + ' из ' + ud.n + ' · в практиках ухода</div></div>' +
     '<div class="kos-card"><h4>Возвращённые — используют косметологию</h4>' +
-      '<div class="kos-pct">' + pct(vd['косметология_практики_n']||0, vd.n) + '%</div>' +
+      '<div class="kos-pct" style="color:var(--voz)">' + pct(vd['косметология_практики_n']||0, vd.n) + '%</div>' +
       '<div class="kos-sub">' + (vd['косметология_практики_n']||0) + ' из ' + vd.n + ' · в практиках ухода</div></div>' +
     '<div class="kos-card"><h4>Возвращённые — хотят косметологию в форматах</h4>' +
-      '<div class="kos-pct">' + pct(vd['косметология_форматы_n']||0, vd.n) + '%</div>' +
+      '<div class="kos-pct" style="color:var(--voz)">' + pct(vd['косметология_форматы_n']||0, vd.n) + '%</div>' +
       '<div class="kos-sub">' + (vd['косметология_форматы_н']||vd['косметология_форматы_n']||0) + ' из ' + vd.n + ' · выбрали в форматах</div></div>';
 
   setTimeout(function() {
