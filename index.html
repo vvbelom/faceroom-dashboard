@@ -1121,13 +1121,33 @@ function renderKos() {
   (vd['косметология_интересы']||[]).forEach(function(q){ quotes.push({text:q.text,city:q.city,seg:'Возвращённые',cls:'voz'}); });
   quotes = quotes.filter(function(q){ return q.text && q.text.trim().length > 3 && isKos(q.text); });
 
+  var KOSC = [
+    {label: 'Аппаратная косметология', keys: ['аппарат','малоинвазив','микротоки','фотоомолож','лазер']},
+    {label: 'Ботокс', keys: ['ботокс']},
+    {label: 'Биоревитализация и инъекции', keys: ['биоревит','инъекц','мезотерап','плазмотерап','контурн','филлер']},
+    {label: 'Лимфодренаж', keys: ['лимфодрен']},
+    {label: 'Пилинг', keys: ['пилинг']},
+    {label: 'Капельницы', keys: ['капельниц']},
+  ];
+  var catCounts = KOSC.map(function(cat) {
+    return {label: cat.label, n: quotes.filter(function(q){
+      var tl = q.text.toLowerCase();
+      return cat.keys.some(function(k){ return tl.includes(k); });
+    }).length};
+  }).filter(function(x){ return x.n > 0; }).sort(function(a,b){ return b.n - a.n; });
+
   const kq = document.getElementById('kos-quotes');
-  kq.innerHTML = quotes.length === 0
-    ? '<div class="quotes-empty">Нет релевантных ответов для выбранного города.</div>'
-    : quotes.map(function(q){
-        return '<div class="quote"><p>' + q.text + '</p>' +
-          '<div class="quote-meta"><span class="seg-badge ' + q.cls + '" style="font-size:10px;padding:1px 7px">' + q.seg + '</span> ' + q.city + '</div></div>';
-      }).join('');
+  if (quotes.length === 0) {
+    kq.innerHTML = '<div class="quotes-empty">Нет релевантных ответов для выбранного города.</div>';
+  } else {
+    kq.innerHTML = '<p style="font-size:12px;color:var(--muted);margin-bottom:14px">Всего упомянули косметологию: ' + quotes.length + ' человек</p>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:10px">' +
+      catCounts.map(function(cat){
+        return '<div style="display:flex;align-items:center;gap:12px;padding:10px 20px;border:1px solid var(--border);border-radius:var(--r);background:var(--card)">' +
+          '<span style="font-size:22px;font-weight:700;color:var(--acc)">' + cat.n + '</span>' +
+          '<span style="font-size:13px;color:var(--text)">' + cat.label + '</span></div>';
+      }).join('') + '</div>';
+  }
 }
 
 // ── FT THEME CHART ───────────────────────────────────────────────────────────
