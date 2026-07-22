@@ -573,6 +573,7 @@ function hbar(id, labels, values, color, total) {
         },
         tooltip: {
           callbacks: {
+            title: function(c) { return labels[c[0].dataIndex]; },
             label: function(c) {
               return ' ' + values[c.dataIndex] + ' чел. (' + c.raw + '%)';
             }
@@ -655,6 +656,7 @@ function gbar(id, labels, datasets, tickSize) {
           mode: 'index',
           intersect: false,
           callbacks: {
+            title: function(c) { return labels[c[0].dataIndex]; },
             label: function(c) {
               var raw = c.dataset.rawData ? c.dataset.rawData[c.dataIndex] : null;
               return ' ' + c.dataset.label + ': ' + c.raw + '%' + (raw !== null ? ' (' + raw + ')' : '');
@@ -876,6 +878,7 @@ function renderUsh() {
         if (val < 8) return '';
         return val + '% (' + _ushReasonsRaw[c.dataIndex] + ')';
       };
+      ch.options.plugins.tooltip.callbacks.title = (function(r){ return function(c){ return r[c[0].dataIndex]; }; })(reas);
       ch.options.plugins.tooltip.callbacks.label = function(c) {
         return ' ' + _ushReasonsRaw[c.dataIndex] + ' чел. (' + c.raw + '%)';
       };
@@ -1282,6 +1285,12 @@ function hbarColors(id, labels, values, colors, total) {
           formatter: function(val, ctx) {
             if (val < 8) return '';
             return val + '% (' + values[ctx.dataIndex] + ')';
+          }
+        },
+        tooltip: {
+          callbacks: {
+            title: function(c) { return labels[c[0].dataIndex]; },
+            label: function(c) { return ' ' + values[c.dataIndex] + ' чел. (' + c.raw + '%)'; }
           }
         }
       },
