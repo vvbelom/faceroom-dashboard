@@ -1060,9 +1060,12 @@ function renderFtCats() {
     '<div class="cat-body"><div class="cat-label">Все темы</div><div class="cat-desc">Все свободные ответы</div></div>' +
     '<div class="cat-count">' + total + '</div></div>';
 
-  FT_CATS.forEach(function(cat) {
-    var n = pool.filter(function(a){ return a.cats.includes(cat.key); }).length;
-    if (!n) return;
+  var catsWithN = FT_CATS.map(function(cat) {
+    return {cat: cat, n: pool.filter(function(a){ return a.cats.includes(cat.key); }).length};
+  }).filter(function(x){ return x.n > 0; });
+  catsWithN.sort(function(a, b){ return b.n - a.n; });
+  catsWithN.forEach(function(item) {
+    var cat = item.cat; var n = item.n;
     var active = ftCat === cat.key;
     html += '<div class="cat-chip' + (active ? ' active' : '') + '" data-cat="' + cat.key + '"' +
       (active ? ' style="border-color:' + cat.color + ';border-width:2px"' : '') + '>' +
