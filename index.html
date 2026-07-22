@@ -102,6 +102,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 /* CHART NOTE */
 .chart-note{font-size:11px;color:var(--muted);line-height:1.6;margin-top:12px;
   padding-top:10px;border-top:1px solid var(--border)}
+.val-cmp-wrap .val-cmp-title{font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.val-cmp{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:start}
+.val-cmp-col-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.val-cmp-item{display:flex;align-items:center;gap:6px;font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)}
+.val-cmp-item:last-child{border-bottom:none}
+.val-cmp-rank{font-size:10px;font-weight:700;color:var(--muted);min-width:13px}
+.val-cmp-lbl-text{flex:1;color:var(--text)}
+.val-cmp-pct{font-weight:700;font-size:12px;white-space:nowrap}
+.val-cmp-arrow{font-size:20px;color:var(--muted);padding-top:28px;text-align:center}
 /* FT SEG FILTER */
 .seg-filter{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
 .seg-flt{padding:5px 14px;border-radius:20px;border:1px solid var(--border);
@@ -670,6 +679,29 @@ function gbar(id, labels, datasets, tickSize) {
   });
 }
 
+// ── HELPER: трансформация ценностей ──────────────────────────────────────────
+function makeValCmp(container, accent, leftTitle, leftData, rightTitle, rightData, n) {
+  function top3(obj) {
+    return Object.entries(obj||{}).sort(function(a,b){return b[1]-a[1];}).slice(0,3);
+  }
+  function rows(items) {
+    return items.map(function(e,i){
+      return '<div class="val-cmp-item">' +
+        '<span class="val-cmp-rank">' + (i+1) + '</span>' +
+        '<span class="val-cmp-lbl-text">' + e[0] + '</span>' +
+        '<span class="val-cmp-pct" style="color:' + accent + '">' + pct(e[1],n) + '%</span>' +
+        '</div>';
+    }).join('');
+  }
+  var div = document.createElement('div'); div.className = 'chart-card val-cmp-wrap'; container.appendChild(div);
+  div.innerHTML = '<div class="val-cmp-title">Трансформация ценностей</div>' +
+    '<div class="val-cmp">' +
+      '<div><div class="val-cmp-col-lbl">' + leftTitle + '</div>' + rows(top3(leftData)) + '</div>' +
+      '<div class="val-cmp-arrow">→</div>' +
+      '<div><div class="val-cmp-col-lbl">' + rightTitle + '</div>' + rows(top3(rightData)) + '</div>' +
+    '</div>';
+}
+
 // ── RENDER ПОСТОЯННЫЕ ────────────────────────────────────────────────────────
 function renderPost() {
   const d = dd('постоянные', city); const n = d.n;
@@ -678,15 +710,19 @@ function renderPost() {
 
   const r1 = document.createElement('div'); r1.className = 'chart-row cols2'; c.appendChild(r1);
   r1.innerHTML = '<div class="chart-card"><h3>Когда сформировалась привычка возвращаться</h3>' +
-    '<div class="sub">Скорость формирования лояльности</div><canvas id="post-habit" height="200"></canvas></div>' +
+    '<div class="sub">Скорость формирования лояльности</div><canvas id="post-habit" height="200"></canvas>' +
+    '<div class="chart-note">71% решили вернуться практически сразу после первого визита, ещё 11% — в течение первого месяца.</div></div>' +
     '<div class="chart-card"><h3>Что изначально привлекло в FaceRoom</h3>' +
-    '<div class="sub">% от ' + n + ' ответивших, мульти-выбор</div><canvas id="post-att" height="200"></canvas></div>';
+    '<div class="sub">% от ' + n + ' ответивших, мульти-выбор</div><canvas id="post-att" height="200"></canvas>' +
+    '<div class="chart-note">Специалист (57%), атмосфера (54%) и расположение (53%) — главные факторы первого выбора.</div></div>';
 
   const r2 = document.createElement('div'); r2.className = 'chart-row cols2'; c.appendChild(r2);
   r2.innerHTML = '<div class="chart-card"><h3>Что сейчас самое ценное в FaceRoom</h3>' +
-    '<div class="sub">% от ' + n + ' ответивших, мульти-выбор</div><canvas id="post-val" height="200"></canvas></div>' +
+    '<div class="sub">% от ' + n + ' ответивших, мульти-выбор</div><canvas id="post-val" height="200"></canvas>' +
+    '<div class="chart-note">Расслабление (79%) и профилактика возраста (52%) сейчас в топе — при том что изначально они не входили в тройку причин прихода. Видимый результат упал с 51% до 30%.</div></div>' +
     '<div class="chart-card"><h3>Если любимый специалист уйдёт из FaceRoom</h3>' +
-    '<div class="sub">Лояльность к бренду vs мастеру</div><canvas id="post-spec" height="200"></canvas></div>';
+    '<div class="sub">Лояльность к бренду vs мастеру</div><canvas id="post-spec" height="200"></canvas>' +
+    '<div class="chart-note">Только 9% уйдут вслед за специалистом. 14% затрудняются ответить — зона риска при уходе любимого специалиста.</div></div>';
 
   const r3 = document.createElement('div'); r3.className = 'chart-card'; c.appendChild(r3);
   r3.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">' +
@@ -737,6 +773,9 @@ function renderPost() {
     document.getElementById('pf-' + mode).classList.add('active');
   }
 
+  makeValCmp(c, 'var(--post)', 'Что привлекло в FaceRoom', d['что_привлекло']||{},
+    'Что ценно сейчас', d['что_ценно']||{}, n);
+
   setTimeout(function() {
     const hab = d['когда_привычка'] || {};
     const habOrd = [
@@ -769,10 +808,11 @@ function renderUsh() {
   setNote('ush-note', n);
   const c = document.getElementById('ush-charts'); c.innerHTML = '';
 
-  function fc(id, title, sub, h) {
+  function fc(id, title, sub, h, note) {
     const div = document.createElement('div'); div.className = 'chart-card'; c.appendChild(div);
     div.innerHTML = '<h3>' + title + '</h3><div class="sub">' + sub + '</div>' +
-      '<canvas id="' + id + '" height="' + (h||240) + '"></canvas>';
+      '<canvas id="' + id + '" height="' + (h||240) + '"></canvas>' +
+      (note ? '<div class="chart-note">' + note + '</div>' : '');
   }
   function hr2(items) {
     const row = document.createElement('div'); row.className = 'chart-row cols2'; c.appendChild(row);
@@ -793,13 +833,16 @@ function renderUsh() {
       '</div>' +
     '</div>' +
     '<div class="sub" id="ush-reasons-sub">% от ' + n + ' ответивших, мульти-выбор</div>' +
-    '<canvas id="ush-reasons" height="200"></canvas>';
+    '<canvas id="ush-reasons" height="200"></canvas>' +
+    '<div class="chart-note">Финансы, время и внешние факторы — причины большинства уходов.</div>';
   hr2([
     ['ush-sit', 'Текущая ситуация клиента', 'Как они описывают своё положение сейчас', 220],
     ['ush-where', 'Где получают похожие услуги сейчас', 'Конкурентная среда после оттока', 220]
   ]);
-  fc('ush-valued', 'Что было ценным в FaceRoom', '% от ' + n + ' ответивших, мульти-выбор', 200);
-  fc('ush-crit', 'Что важно при выборе места ухода сейчас', '% от ' + n + ' ответивших, мульти-выбор', 220);
+  fc('ush-valued', 'Что было ценным в FaceRoom', '% от ' + n + ' ответивших, мульти-выбор', 200,
+    'Расслабление (69%), специалист (52%) и атмосфера (48%) — те же эмоциональные ценности, что и у постоянных.');
+  fc('ush-crit', 'Что важно при выборе места ухода сейчас', '% от ' + n + ' ответивших, мульти-выбор', 220,
+    'При выборе нового места наиболее важны рациональные факторы: квалификация (73%), цена (71%), расположение (67%).');
 
   var _ushN = n;
   var _ushReasonsRaw = [];
@@ -844,6 +887,13 @@ function renderUsh() {
     document.getElementById('rtgl-' + mode).classList.add('active');
   }
 
+  var ushCritObj = {};
+  Object.entries(d['что_важно_при_выборе']||{}).forEach(function(e){
+    if (!e[0].includes('уточните')) ushCritObj[e[0]] = e[1];
+  });
+  makeValCmp(c, 'var(--ush)', 'Что ценили в FaceRoom', d['что_было_ценным']||{},
+    'Критерии выбора сейчас', ushCritObj, n);
+
   setTimeout(function() {
     showUshReasons('all');
 
@@ -871,24 +921,29 @@ function renderVoz() {
   setNote('voz-note', n);
   const c = document.getElementById('voz-charts'); c.innerHTML = '';
 
-  function fc(id, title, sub, h) {
+  function fc(id, title, sub, h, note) {
     const div = document.createElement('div'); div.className = 'chart-card'; c.appendChild(div);
     div.innerHTML = '<h3>' + title + '</h3><div class="sub">' + sub + '</div>' +
-      '<canvas id="' + id + '" height="' + (h||240) + '"></canvas>';
+      '<canvas id="' + id + '" height="' + (h||240) + '"></canvas>' +
+      (note ? '<div class="chart-note">' + note + '</div>' : '');
   }
   function hr2(items) {
     const row = document.createElement('div'); row.className = 'chart-row cols2'; c.appendChild(row);
     items.forEach(function(item) {
       const div = document.createElement('div'); div.className = 'chart-card'; row.appendChild(div);
       div.innerHTML = '<h3>' + item[1] + '</h3><div class="sub">' + item[2] + '</div>' +
-        '<canvas id="' + item[0] + '" height="' + (item[3]||220) + '"></canvas>';
+        '<canvas id="' + item[0] + '" height="' + (item[3]||220) + '"></canvas>' +
+        (item[4] ? '<div class="chart-note">' + item[4] + '</div>' : '');
     });
   }
 
-  fc('voz-triggers', 'Что стало поводом снова записаться', '% от ' + n + ' ответивших, мульти-выбор', 220);
-  fc('voz-val', 'Что сейчас самое ценное в FaceRoom', '% от ' + n + ' ответивших, мульти-выбор', 220);
+  fc('voz-triggers', 'Что стало поводом снова записаться', '% от ' + n + ' ответивших, мульти-выбор', 220,
+    'Второй по силе триггер — память о хорошем опыте (46%). CRM-напоминание работает, когда попадает в момент, когда внутреннее желание (77%) уже созрело.');
+  fc('voz-val', 'Что сейчас самое ценное в FaceRoom', '% от ' + n + ' ответивших, мульти-выбор', 220,
+    'После возврата повторно оценивают профессионализм специалистов (58%), ценность расслабления (77%) и атмосферы (50%) также в топ-3 и совпадают с постоянными.');
   hr2([
-    ['voz-crit', 'Что важно при выборе места ухода', '% от ' + n + ' ответивших, мульти-выбор', 260],
+    ['voz-crit', 'Что важно при выборе места ухода', '% от ' + n + ' ответивших, мульти-выбор', 260,
+      'При выборе места — квалификация (75%), результат (71%), атмосфера (69%). Рациональный вход, эмоциональное удержание.'],
     ['voz-fmt',  'Какие форматы были бы интересны',  '% от ' + n + ' ответивших, мульти-выбор', 260]
   ]);
 
@@ -940,6 +995,13 @@ function renderVoz() {
     document.querySelectorAll('.vf-btn').forEach(function(b){ b.classList.remove('active'); });
     document.getElementById('vf-' + mode).classList.add('active');
   }
+
+  var vozCritObj = {};
+  Object.entries(d['что_важно_при_выборе']||{}).forEach(function(e){
+    if (!e[0].includes('уточните')) vozCritObj[e[0]] = e[1];
+  });
+  makeValCmp(c, 'var(--voz)', 'Критерии выбора', vozCritObj,
+    'Что ценно после возврата', d['что_ценно']||{}, n);
 
   setTimeout(function() {
     const tr = d['поводы_вернуться'] || {};
