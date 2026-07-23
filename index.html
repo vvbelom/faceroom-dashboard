@@ -1553,7 +1553,7 @@ function showColDropdown(key, th) {
 function renderRosterBody() {
   var rows = rosterFiltered();
   var tbody = document.getElementById('roster-tbody');
-  document.getElementById('roster-info').textContent = rows.length + ' из ' + ROSTER.length + ' респондентов';
+  document.getElementById('roster-info').textContent = rows.length + ' из 195 респондентов';
   tbody.innerHTML = rows.map(function(r) {
     return '<tr>' + ROSTER_COLS.map(function(col) {
       var v = r[col.key] || '';
