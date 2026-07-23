@@ -1482,7 +1482,8 @@ function rosterFiltered() {
     return ROSTER_COLS.every(function(col) {
       if (!col.filterable) return true;
       var f = rosterFilters[col.key];
-      return !f || f.size === 0 || f.has(r[col.key]);
+      if (f === undefined || f === null) return true;  // no filter set
+      return f.has(r[col.key]);
     });
   });
 }
@@ -1508,21 +1509,33 @@ function showColDropdown(key, th) {
   vals.forEach(function(v) {
     var lbl = document.createElement('label');
     var cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = v;
-    cb.checked = cur.size === 0 || cur.has(v);
+    cb.checked = cur === null || cur.size === 0 || cur.has(v);
     cb.addEventListener('change', function() {
       var checked = Array.from(dd.querySelectorAll('input[value]')).filter(function(c){ return c.checked; }).map(function(c){ return c.value; });
-      rosterFilters[key] = checked.length === vals.length ? new Set() : new Set(checked);
-      allCb.checked = rosterFilters[key].size === 0;
-      th.classList.toggle('filtered', rosterFilters[key].size > 0 && rosterFilters[key].size < vals.length);
+      if (checked.length === vals.length) {
+        rosterFilters[key] = null;
+        allCb.checked = true;
+        th.classList.remove('filtered');
+      } else {
+        rosterFilters[key] = new Set(checked);
+        allCb.checked = false;
+        th.classList.toggle('filtered', checked.length > 0);
+      }
       renderRosterBody();
     });
     lbl.appendChild(cb); lbl.appendChild(document.createTextNode(' ' + v));
     dd.appendChild(lbl);
   });
   allCb.addEventListener('change', function() {
-    rosterFilters[key] = new Set();
-    dd.querySelectorAll('input[value]').forEach(function(c){ c.checked = true; });
-    th.classList.remove('filtered');
+    if (allCb.checked) {
+      rosterFilters[key] = null;
+      dd.querySelectorAll('input[value]').forEach(function(c){ c.checked = true; });
+      th.classList.remove('filtered');
+    } else {
+      rosterFilters[key] = new Set();
+      dd.querySelectorAll('input[value]').forEach(function(c){ c.checked = false; });
+      th.classList.add('filtered');
+    }
     renderRosterBody();
   });
   var rect = th.getBoundingClientRect();
