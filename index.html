@@ -568,6 +568,7 @@ const FT_QUOTES = [{"idx": 1, "seg": "постоянные", "city": "Санкт
 const FT_CATS = [{"key": "privacy", "label": "Приватность и тишина", "color": "#6366f1", "desc": "Ширмы, отдельные кабинеты, тишина во время процедур"}, {"key": "positive", "label": "Позитивные отзывы", "color": "#2e7d62", "desc": "Благодарности и положительные впечатления"}, {"key": "services", "label": "Новые услуги и форматы", "color": "#1a56db", "desc": "Идеи по расширению услуг, комплексных форматов"}, {"key": "pricing", "label": "Цены и акции", "color": "#b5a06a", "desc": "Запросы на снижение цен, акции, абонементы"}, {"key": "quality", "label": "Специалисты и сервис", "color": "#d97706", "desc": "Качество специалистов, стандарты, атмосфера"}, {"key": "location", "label": "Расположение и доступность", "color": "#64748b", "desc": "Новые локации, парковка, часы работы"}, {"key": "cosmetics", "label": "Косметика и продукты", "color": "#be185d", "desc": "Расширение линейки, домашний уход, ароматы"}];
 const ECON_DATA = {"all": {"post": {"n": 86, "rev": 79985, "freq": 17, "act": 91, "check": 4564}, "ush": {"n": 52, "rev": 23502, "freq": 5, "act": 33, "check": 4573}, "voz": {"n": 52, "rev": 25772, "freq": 6, "act": 42, "check": 4536}}, "Санкт-Петербург": {"post": {"n": 62, "rev": 90023, "freq": 19, "act": 92, "check": 4509}, "ush": {"n": 43, "rev": 19980, "freq": 4, "act": 33, "check": 4477}, "voz": {"n": 39, "rev": 26245, "freq": 6, "act": 42, "check": 4378}}, "Москва": {"post": {"n": 17, "rev": 71465, "freq": 13, "act": 83, "check": 6260}, "ush": {"n": 8, "rev": 28932, "freq": 6, "act": 29, "check": 5078}, "voz": {"n": 12, "rev": 21640, "freq": 4, "act": 38, "check": 4639}}, "Уфа": {"post": {"n": 7, "rev": 53606, "freq": 18, "act": 83, "check": 2821}, "ush": {"n": 1, "rev": 25660, "freq": 4, "act": 25, "check": 6415}, "voz": {"n": 1, "rev": 33488, "freq": 3, "act": 25, "check": 11163}}};
 const USH_COMP = {"n": 22, "reasons": {"Изменились финансовые приоритеты": 8, "Стала выбирать другие услуги или студии": 8, "Не хватало времени": 7, "Изменились жизненные обстоятельства": 6, "Не ощущала достаточной ценности относительно стоимости услуг": 5, "Не всегда удавалось записаться в удобное время": 3, "Другое (уточните в следующем вопросе)": 3, "Не всегда удавалось записаться к нужному специалисту": 2}};
+const USH_AGE_REASONS = {"result": {"n": 1, "by_age": {"18–25": 0, "26–35": 0, "36–45": 1, "46–55": 0, "56+": 0}}, "value": {"n": 5, "by_age": {"18–25": 1, "26–35": 1, "36–45": 2, "46–55": 1, "56+": 0}}, "age_order": ["18–25", "26–35", "36–45", "46–55", "56+"]};
 const POST_FREQ_SUB = {"n": 51, "data": {"Более выгодные условия посещения": 35, "Уже посещаю с комфортной частотой": 21, "Возможность записи в удобное для меня время": 8, "Удобство записи к нужному специалисту": 5, "Персональный план ухода от специалиста": 4, "Более прогнозируемый и стабильный результат": 2, "Поддержка и напоминания между визитами": 0}};
 const VOZ_FREQ_SUB = {"n": 26, "data": {"Более выгодные условия посещения": 19, "Уже посещаю с комфортной частотой": 8, "Персональный план ухода от специалиста": 6, "Поддержка и напоминания между визитами": 4, "Возможность записи в удобное для меня время": 2, "Более прогнозируемый и стабильный результат": 3, "Удобство записи к нужному специалисту": 0}};
 
@@ -893,6 +894,31 @@ function renderUsh() {
     '<div class="sub" id="ush-reasons-sub">% от ' + n + ' ответивших, мульти-выбор</div>' +
     '<canvas id="ush-reasons" height="200"></canvas>' +
     '<div class="chart-note">Финансы, время и внешние факторы — причины большинства уходов.</div>';
+  (function(){
+    var ar = USH_AGE_REASONS;
+    var r1 = ar.result, r2 = ar.value;
+    var ages = ar.age_order.filter(function(a){ return (r1.by_age[a]||0) + (r2.by_age[a]||0) > 0; });
+    if (!ages.length) return;
+    var rows = ages.map(function(a){
+      var n1 = r1.by_age[a]||0, n2 = r2.by_age[a]||0;
+      return '<tr>' +
+        '<td style="padding:5px 8px;border-top:1px solid #eee;font-size:12px;color:var(--text)">' + a + '</td>' +
+        '<td style="padding:5px 8px;border-top:1px solid #eee;font-size:12px;text-align:center;color:var(--text)">' + (n1||'—') + '</td>' +
+        '<td style="padding:5px 8px;border-top:1px solid #eee;font-size:12px;text-align:center;color:var(--text)">' + (n2||'—') + '</td>' +
+      '</tr>';
+    }).join('');
+    var tbl = '<div style="margin-top:16px">' +
+      '<p style="font-size:11px;color:var(--muted);margin:0 0 8px 0;font-weight:600;text-transform:uppercase;letter-spacing:.04em">Возрастной разрез (все города)</p>' +
+      '<table style="width:100%;border-collapse:collapse">' +
+      '<thead><tr>' +
+        '<th style="text-align:left;padding:5px 8px;border-bottom:2px solid #ddd;font-size:11px;color:var(--muted);font-weight:600">Возраст</th>' +
+        '<th style="text-align:center;padding:5px 8px;border-bottom:2px solid #ddd;font-size:11px;color:var(--muted);font-weight:600">Перестала видеть результат (n=' + r1.n + ')</th>' +
+        '<th style="text-align:center;padding:5px 8px;border-bottom:2px solid #ddd;font-size:11px;color:var(--muted);font-weight:600">Не ощущала ценности (n=' + r2.n + ')</th>' +
+      '</tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+      '</table></div>';
+    reasonsCard.insertAdjacentHTML('beforeend', tbl);
+  })();
   hr2([
     ['ush-sit', 'Текущая ситуация клиента', 'Как они описывают своё положение сейчас', 220],
     ['ush-where', 'Где получают похожие услуги сейчас', 'Конкурентная среда после оттока', 220]
